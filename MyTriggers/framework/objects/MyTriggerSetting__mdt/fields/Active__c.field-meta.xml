@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Active__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Should the trigger class be run? Only uncheck this with extreme caution as it disabling an important triggers could cause data inconsistency</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Should the trigger class be run? Only uncheck this with extreme caution as it disabling an important triggers could cause data inconsistency</inlineHelpText>
+    <label>Active</label>
+    <type>Checkbox</type>
+</CustomField>

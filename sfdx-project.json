@@ -1,0 +1,25 @@
+{
+    "packageDirectories": [
+        {
+            "path": "MyTriggers",
+            "default": true,
+            "packageName": "MyTriggers"
+        },
+        {
+            "path": "./MyTriggers",
+            "package": "MyTriggers",
+            "versionName": "Leightweight Custom Metadata driven Trigger Framework that scales to your needs",
+            "versionNumber": "1.0.0.NEXT",
+            "default": false
+        }
+    ],
+    "namespace": "",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "43.0",
+    "packageAliases": {
+        "MyTriggers": "0Ho1i0000000001CAA",
+        "MyTriggers@0.1.0-1": "04t1i000000gNXOAA2",
+        "MyTriggers@1.0.0-1": "04t1i000000gNXTAA2",
+        "MyTriggers@1.0.0-2": "04t1i000000gNXYAA2"
+    }
+}

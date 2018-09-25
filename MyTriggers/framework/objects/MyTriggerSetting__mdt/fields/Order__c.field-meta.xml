@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Order__c</fullName>
+    <defaultValue>0</defaultValue>
+    <description>Handlers are run in ascending order of this field for a given sObject and Event. If order is unimportant, you can just use 0.</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Handlers are run in ascending order of this field for a given sObject and Event Handlers are run in ascending order of this field for a given sObject and Event. If order is unimportant, you can just use 0.</inlineHelpText>
+    <label>Order</label>
+    <precision>18</precision>
+    <required>true</required>
+    <scale>0</scale>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>
