@@ -102,7 +102,7 @@ AccountTrigger on Account (
 	after delete, 
 	after undelete) {
 	
-	new MyTriggers().run();
+	MyTriggers().run();
 
 }
 ```
