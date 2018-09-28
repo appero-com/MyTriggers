@@ -1,6 +1,6 @@
 # MyTriggers
 
-Lightweight Custom Metadata driven Trigger Framework that scales to your needs. Provided with <3 by appero.com
+  Lightweight Custom Metadata driven Trigger Framework that scales to your needs. Extended from [TriggerX](https://github.com/se6wagner/TriggerX) by Seb Wagner, provided with <3 by appero.com
 
 ## Installation
 
@@ -39,6 +39,183 @@ Use the issues page
 ## Contribution
 
 PRs are welcome
+
+# MyTriggers HowTo
+MyTriggers is a lightweight Custom Metadata driven Trigger Framework that scales to your needs. 
+It is based upon the foundation of [TriggerX that Sebastian Wagner wrote in 2013](https://github.com/se6wagner/TriggerX), which was a perfect starting point since it covered all one could wish for in a trigger handler except Custom Metadata Types. 
+
+The general approach behind MyTriggers is
+
+* run all triggers through one central handler, even across namespaces. 
+* design the orchestration of logic in a way that allows you to declarative wire things differently
+* think about Triggers in new ways: configurable, closer to business needs/processes than database changes 
+
+## Dreamforce 2018: "Route Your Triggers Like a Pro"
+
+MyTriggers was released by [appero GmbH](http://www.appero.com) and publicly presented by [Christian Szandor Knapp](https://www.shoreforce.de) and [Daniel Stange](https://blog.danielstange.de).
+
+If you want to recap the session, a recording will be available a few weeks after Dreamforce. The session discussion and assets will be stored at [the session's tralblazer commuinty page](https://bit.ly/df18triggeers).
+
+You can follow Szandor on Twitter at [@ch_sz_knapp](https://twitter.com/ch_sz_knapp), Daniel is [@stangomat](https://twitter.com/stangomat).
+
+## A change in perspective - a Business Process Centric Approach
+
+When you reflect upon what your triggers actually do, you may hardly ever say that they are pieces of code that react to changes in data whenever they happen.
+You'd rather describe them as *entry points for your business processes* that, for example, create an onboarding case for new customers whenever an opportunity closes, but only for accounts that never had a closed opportunity before.
+
+Now, with that description in mind, we should build our trigger handlers in a way that they can react to change in business requirements, and that they handle a lot more than just the records that initially started the process.
+
+This is why MyTriggers has a *records* property that contains any sObject type (but all the records that are handled currently), and this is why there are Custom Metadata Type records that can be activated, grouped by names, put in a sequential orders (and re-ordered if need be).
+
+You decide what happens when a trigger fires - the constant is that it will always open one central instance of MyTriggers that orchestrates your business processes according to your Metadata config.
+
+## General Design
+
+* Trigger execution will be started by instantion of MyTriggers and calling the run() method from a Trigger
+* records contains all objects currently handled by the trigger context
+* recordsNotYetProcessed can be inspected through their getter method
+* Ids of updated records can be accessed through their getter method
+* handled trigger contexts can be accessed through their setter method
+* you can enable() or disable() specific handler steps or trigger contexts at runtime
+* for each handler step, MyTriggers has to be extended
+* each handler step orchestrates its logic through overriding methods specific for the trigger contexts.
+	* onBeforeInsert()
+	* onAfterInsert()
+	* onBeforeUpdate()
+	* onAfterUpdate()
+	* onBeforeDelete()
+	* onAfterDelete()
+	* onAfterUndelete()
+	
+## Registering MyTriggers for all Trigger contexts
+
+For MyTriggers to handle your triggers, create a Trigger for _all_ contexts. Create a new instance of MyTriggers and call `run()`.
+
+
+```
+AccountTrigger on Account (
+	before insert, 
+	before update, 
+	before delete, 
+	after insert, 
+	after update, 
+	after delete, 
+	after undelete) {
+	
+	new MyTriggers().run();
+
+}
+```
+
+## Building Trigger Handler Steps
+
+Each handler step should extend the MyTriggers class and can override any of the methods.
+
+
+```
+public class ChurnProcess_OpenCustomerSuccessCase extends MyTrigger (
+	
+
+	public override void onBeforeUpdate() {
+		// some business process step here
+	}
+	
+	private void stepLogic() {
+		// some method to handle the logic
+	}
+}
+```
+
+
+
+
+## Working With the "records" Propery
+
+MyTriggers exposes a public instance variable *records* that contains all records that are handled by MyTriggers. When working with the *records* property,
+you should cast it to a specific type.
+
+```
+(List<Account>)records
+```
+
+MyTriggers has a helper property for you to control your the process flow: *recordsNotYetProcessed*. You can access it through its getter method, Same goes for updated records - you can access their Ids through a getter
+
+## Registering Steps For Execution
+The execution flow is controlled by custom metadata records of the MyTriggerSetting type.
+You have to specify
+
+* an sObject Type of a standard or custom object or a platform event
+* a class that contains your logic for this step
+* a trigger context
+
+Additionally, you should set
+
+* the activation flag
+* a sequence number
+
+Optionally, set 
+
+* a namespace prefix for the class that you are going to call if you want to call (or build) namespaced trigger handler steps.
+
+### One Word About Sequence Numbering
+
+It doesn't really matter which sequence numbering you choose as long as it can be sorted. To avoid renumbering a whole set of steps, choose a numbering method that allows for gaps. 
+
+Classic ERP numbering styles and sequence might make you smile - but if your initial numbering sequence was 100, 200, 300, 400, 500 ..., you can add 190 and 210 later, and 195 and 215... without renumbering the whole list if you add one step inbetween.
+
+### Deactivating Triggers
+
+MyTriggers allows you to deactivate or re-wire Trigger steps in productive environments. But just because it is possible does not mean that it is a good idea, necessarily. 
+
+Be **extra careful** when you **deactivate** or **modify** productive Trigger handler steps and keep a reminder that works for you (sticky notes, an alarm clock) so that you don't forget to activate your triggers again.
+
+## Enable Steps Or Trigger Contexts at Runtime
+
+MyTriggers allows total control over all trigger operation at runtime. 
+
+```
+public override void onAfterInsert() {
+        
+        // records property provided by myTriggers
+        List<Account> newAccounts = new Map<Id,Map>(records);
+        
+        // disable after insert trigger on Opp so it doesn't interfere
+        myTriggers.disable(myCaseTrigger.class,
+                           new List<System.TriggerOperation>{
+                               System.TriggerOperation.AFTER_UPDATE});
+       
+        CaseService.updateCustomerCareCases(newAccounts);
+    }  
+```
+
+## Finding Out If (And Which) Data Has Changed
+
+```
+// use string field names
+List<String> fieldNamesToCheck = new String[]{'Multiplier__c','Revenue__c','OwnerId','Type__c'};
+
+if (MyTriggers.hasChangedFields(fieldNamesToCheck,record,recordOld)){
+	// logic executed when condition is true
+}
+
+// or sObjectFields
+sObjectField[] fieldsToCheck = new sObjectField[]{Share__c.Multiplier__c, Share__c.Revenue__c, Share__c.OwnerId, Share__c.Type__c};
+
+for (sObjectField field : MyTriggers.getChangedFields(fieldsToCheck,record,recordOld)){
+	// process field
+} 
+```
+
+
+## Recursion control
+
+```
+// add all records in the current update context
+MyTriggers.addUpdatedIds(triggerOldMap.keySet());
+
+// and use this to return only records which havent been processed before
+List<Sobject> untouchedRecords = MyTriggers.getRecordsNotYetProcessed();
+```
 
 # Documentation
 
