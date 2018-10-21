@@ -669,11 +669,12 @@ global virtual class MyTriggers {
                 [SELECT DeveloperName, 
 				        ClassNamespacePrefix__c, 
 						Event__c, 
-						sObject__c, 
+						sObject__c,
+                        sObject__r.QualifiedApiName, 
 						Class__c, 
 						Order__c
                 FROM MyTriggerSetting__mdt
-                WHERE sObject__c = :sObjectName 
+                WHERE sObject__r.QualifiedApiName = :sObjectName 
                     AND Active__c = true
                 ORDER BY Order__c, 
                          DeveloperName ASC]);
