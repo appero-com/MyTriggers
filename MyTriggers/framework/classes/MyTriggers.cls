@@ -670,7 +670,7 @@ global virtual class MyTriggers {
 				        ClassNamespacePrefix__c, 
 						Event__c, 
 						sObject__c,
-                        sObject__r.QualifiedApiName, 
+                                                sObject__r.QualifiedApiName, 
 						Class__c, 
 						Order__c
                 FROM MyTriggerSetting__mdt
