@@ -6,8 +6,8 @@
 
 ### Developer Controlled Package
 
-* Production Instances: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1i000000gNXOAA2
-* Sandbox Instances: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1i000000gNXOAA2
+* Production Instances: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1i000000gZ4HAAU
+* Sandbox Instances: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1i000000gZ4HAAU
 ### From Source
 Clone this repo
 
@@ -93,7 +93,7 @@ For MyTriggers to handle your triggers, create a Trigger for _all_ contexts. Cre
 
 
 ```
-AccountTrigger on Account (
+Trigger AccountTrigger on Account (
 	before insert, 
 	before update, 
 	before delete, 
@@ -113,7 +113,7 @@ Each handler step should extend the MyTriggers class and can override any of the
 
 
 ```
-public class ChurnProcess_OpenCustomerSuccessCase extends MyTrigger (
+public class ChurnProcess_OpenCustomerSuccessCase extends MyTriggers (
 	
 
 	public override void onBeforeUpdate() {
