@@ -114,12 +114,12 @@ Each handler step should extend the MyTriggers class and can override any of the
 
 
 ```
-public class ChurnProcess_OpenCustomerSuccessCase extends MyTriggers (
+public class newAccounts_ValidateType extends MyTriggers {
 	
 
-	public override void onBeforeUpdate() {
-		// some business process step here
-	}
+	public override void onBeforeInsert() {
+		List<Account> newAccounts = (List<Account>)records;
+    	}
 	
 	private void stepLogic() {
 		// some method to handle the logic
