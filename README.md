@@ -32,9 +32,10 @@ sfdx force:source:convert -r MyTriggers/framework -d src && sfdx force:mdapi:dep
 [TriggerX by Sebastian Wagner](https://github.com/se6wagner/TriggerX)
 
 
-## Issues
+## Issues / Known Limitations
+- Custom Metadata Types cannot reference `User sObject` currently.
 
-Use the issues page
+Found something? Use the issues page
 
 ## Contribution
 
