@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Description__c</fullName>
+    <description>Room for memorable words describing the why/what and how of your MyTrigger Setting.</description>
     <externalId>false</externalId>
     <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Room for memorable words describing the why/what and how of your MyTrigger Setting.</inlineHelpText>
     <label>Description</label>
     <length>32768</length>
     <type>LongTextArea</type>

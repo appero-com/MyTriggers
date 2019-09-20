@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>sObject__c</fullName>
+    <description>The sObject for which a Trigger implementing MyTrigger exists and for which a specific class should run</description>
     <externalId>false</externalId>
     <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Choose to sObject for which you want to run the class</inlineHelpText>
     <label>sObject</label>
     <referenceTo>EntityDefinition</referenceTo>
     <relationshipLabel>TriggerHandlerSettings</relationshipLabel>
