@@ -17,7 +17,7 @@
     <labels>
         <fullName>Errors_InvalidSettingConfiguration</fullName>
         <language>en_US</language>
-        <protected>true</protected>
+        <protected>false</protected>
         <shortDescription>Errors_InvalidSettingConfiguration</shortDescription>
         <value>Fatal configuration error on &quot;{0}&quot;: You cannot specify sObject and sObject Override on the same setting with different values. Please check Validation Rule VR01_PreventUseOfBothSObjectFields is active to prevent faulty configuration.</value>
     </labels>
