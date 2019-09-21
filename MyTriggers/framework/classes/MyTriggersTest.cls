@@ -552,7 +552,7 @@ private class MyTriggersTest {
 		filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
 		System.assertEquals (originalTriggerHandlerSettings.size(),
 		                     filteredTriggerHandlerSettings.size(),
-		                     'Bypass permission active but no custom permission makes no difference');
+		                     'Bypass checkbox active but no custom permission makes no difference');
 
 		//enable permission
 		User userWithCustomPermission = new User (alias = 'test123',
@@ -584,6 +584,7 @@ private class MyTriggersTest {
 		}
 
 		System.runAs(userWithCustomPermission) {
+			originalTriggerHandlerSettings[0].IsByPassAllowed__c = null;
 			filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
 			System.assertEquals (originalTriggerHandlerSettings.size(),
 			                     filteredTriggerHandlerSettings.size(),
