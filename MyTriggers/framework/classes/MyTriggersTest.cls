@@ -124,12 +124,12 @@ private class MyTriggersTest {
 	}
 
 	private static MyTriggerSetting__mdt getTriggerHandlingSetting(String objTypeName, System.TriggerOperation event, String className){
-		JSONObject jsonObj = new JSONObject(new MyTriggerSetting__mdt());
-		jsonObj.set('DeveloperName','TestHandler'+event.name());
-		jsonObj.set('Event__c', event.name(), true);
-		jsonObj.set('sObject__c', objTypeName, true);
-		jsonObj.set('Class__c', className, true);
-        MyTriggerSetting__mdt triggerHandlerSetting = (MyTriggerSetting__mdt) jsonObj.deserialize(MyTriggerSetting__mdt.class);
+		MyTriggerSetting__mdt triggerHandlerSetting = new MyTriggerSetting__mdt(
+			DeveloperName = 'TestHandler'+event.name(),
+			Event__c = event.name(),
+			sObject__c = objTypeName,
+			sobjectAPIName__c = objTypeName,
+			Class__c = className);
 		return triggerHandlerSetting;
 	}
 
@@ -173,7 +173,7 @@ private class MyTriggersTest {
 		};
 
 		hndl.doConstruct(records);
-		myTriggers.addUpdatedIds(new Set<Id>{UserInfo.getUserId()});
+		myTriggers.addUpdatedIds(new Set<Id> {UserInfo.getUserId()});
 
 		system.assertEquals(true,myTriggers.getUpdatedIds().contains(UserInfo.getUserId()));
 		system.assertEquals(null,hndl.getNonRecursiveRecords().get(0).Id,'should not return any record which id is returned by myTriggers.getUpdatedIds()');
@@ -421,7 +421,7 @@ private class MyTriggersTest {
 		myTriggers.disable(typ);
 
 		// make sure all events are disabled
-		for (System.TriggerOperation tiggerEvent:System.TriggerOperation.values())	{
+		for (System.TriggerOperation tiggerEvent:System.TriggerOperation.values())      {
 			system.assert (myTriggers.isDisabled(typ, tiggerEvent),tiggerEvent.name() + ' shoud be disabled for ' + typ.toString());
 		}
 
@@ -429,7 +429,7 @@ private class MyTriggersTest {
 		// and enable all
 		myTriggers.enable(typ, System.TriggerOperation.values());
 
-		for (System.TriggerOperation tiggerEvent:System.TriggerOperation.values())	{
+		for (System.TriggerOperation tiggerEvent:System.TriggerOperation.values())      {
 			system.assert (!myTriggers.isDisabled(typ, tiggerEvent),tiggerEvent.name() + ' shoud be enabled for ' + typ.toString());
 		}
 
@@ -537,6 +537,28 @@ private class MyTriggersTest {
 		}
 
 		System.assertEquals(false, success, 'myTriggers.getTriggerHandlerType should fail for invalid trigger handler classname');
+	}
+
+	private static testMethod void validate_NoError() {
+		Boolean success = true;
+		MyTriggers.qualifiedApiNameMock = 'Account';
+		try {
+			myTriggers.validate (getTriggerHandlingSettingsForSObjectType('Account'));
+		} catch(myTriggers.myTriggersException e) {
+			success = false;
+		}
+		System.assertEquals(true, success, 'Setting should pass since both sObject fields point to the same object');
+	}
+
+	private static testMethod void validate_ValidException() {
+		Boolean success = true;
+		MyTriggers.qualifiedApiNameMock = 'Case';
+		try {
+			myTriggers.validate (getTriggerHandlingSettingsForSObjectType('Account'));
+		} catch(myTriggers.myTriggersException e) {
+			success = false;
+		}
+		System.assertEquals(false, success, 'Setting must raise exception since  sObject fields point to different objects');
 	}
 
 }
