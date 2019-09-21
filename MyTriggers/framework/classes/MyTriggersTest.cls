@@ -138,7 +138,8 @@ private class MyTriggersTest {
 	// Handler Features
 	//--------------------------------------------------------------
 	// test #hasChangedFields and #getChangedFields for myTriggers
-	private static testMethod void fieldChangesTest(){
+	@isTest
+	private static void fieldChangesTest(){
 
 		String name = 'SAME_NAME';
 		Account record = new Account(Name = name, Phone = '123456');
@@ -162,7 +163,8 @@ private class MyTriggersTest {
 
 
 	// test for recusion control while updating
-	private static testMethod void recursionControlTest(){
+	@isTest
+	private static void recursionControlTest(){
 
 		Test.startTest();
 
@@ -186,7 +188,8 @@ private class MyTriggersTest {
 	//--------------------------------------------------------------
 
 	// test support with trigger control
-	private static testMethod void fromControlTest(){
+	@isTest
+	private static void fromControlTest(){
 
 		Type typ = AccountHandler.class;
 
@@ -217,7 +220,8 @@ private class MyTriggersTest {
 	}
 
 	// test support with trigger control
-	private static testMethod void fromControlTest_publicManagedHandlers(){
+	@isTest
+	private static void fromControlTest_publicManagedHandlers(){
 
 		Type typ = AccountHandler.class;
 		String namespacePrefix = '';
@@ -250,7 +254,8 @@ private class MyTriggersTest {
 
 
 	// Test for myTriggers.handleTrigger methods, with event control
-	private static testMethod void handleTriggerTest(){
+	@isTest
+	private static void handleTriggerTest(){
 
 		Test.startTest();
 
@@ -281,7 +286,8 @@ private class MyTriggersTest {
 	}
 
 	// Test for myTriggers.handleTrigger methods, with event control
-	private static testMethod void handleTriggerTest_publicManagedHandlers(){
+	@isTest
+	private static void handleTriggerTest_publicManagedHandlers(){
 
 		Test.startTest();
 
@@ -313,7 +319,8 @@ private class MyTriggersTest {
 		Test.stopTest();
 	}
 
-	private static testMethod void handleTriggerTest_UsingTriggerHandlerSettings(){
+	@isTest
+	private static void handleTriggerTest_UsingTriggerHandlerSettings(){
 
 		Test.startTest();
 
@@ -337,7 +344,8 @@ private class MyTriggersTest {
 		Test.stopTest();
 	}
 
-	private static testMethod void handleTriggerTest_NoExistingTriggerHandlers(){
+	@isTest
+	private static void handleTriggerTest_NoExistingTriggerHandlers(){
 
 		Test.startTest();
 
@@ -359,7 +367,8 @@ private class MyTriggersTest {
 
 
 	// controls all events via myTriggers.disable(Type) and myTriggers.enable(Type)
-	public static testMethod void dynamicControlAllTest_publicManagedHandlers(){
+	@isTest
+	public static void dynamicControlAllTest_publicManagedHandlers(){
 
 		Test.startTest();
 		Type typ = AccountHandler.class;
@@ -387,7 +396,8 @@ private class MyTriggersTest {
 	}
 
 	// controls all events via myTriggers.disable(Type) and myTriggers.enable(Type)
-	public static testMethod void dynamicControlAllTest(){
+	@isTest
+	public static void dynamicControlAllTest(){
 
 		Test.startTest();
 		Type typ = AccountHandler.class;
@@ -412,7 +422,8 @@ private class MyTriggersTest {
 
 
 	// enables all events via myTriggers.enable(Type, EventType[])
-	public static testMethod void dynamicControlTest(){
+	@isTest
+	public static void dynamicControlTest(){
 
 		Test.startTest();
 		Type typ = AccountHandler.class;
@@ -437,7 +448,8 @@ private class MyTriggersTest {
 	}
 
 	// enables all events via myTriggers.enable(Type, EventType[])
-	public static testMethod void dynamicControlTest_publicManagedHandlers() {
+	@isTest
+	public static void dynamicControlTest_publicManagedHandlers() {
 
 		Test.startTest();
 		Type typ = AccountHandler.class;
@@ -467,7 +479,8 @@ private class MyTriggersTest {
 
 
 	// tests myTriggers.run(Type) without Trigger context, coverage only
-	private static testMethod void nonTriggerContextTest() {
+	@isTest
+	private static void nonTriggerContextTest() {
 
 		Boolean success = true;
 		try
@@ -483,7 +496,8 @@ private class MyTriggersTest {
 
 
 	// calls virtual myTriggers methods, just for TestCoverage
-	private static testMethod void nonOverrideTest(){
+	@isTest
+	private static void nonOverrideTest(){
 
 		Test.startTest();
 
@@ -500,7 +514,8 @@ private class MyTriggersTest {
 	}
 
 	// calls getInsertEvents, getUpdateEvents and getDeleteEvents()
-	private static testMethod void getTypesTest(){
+	@isTest
+	private static void getTypesTest(){
 
 		Test.startTest();
 
@@ -516,7 +531,8 @@ private class MyTriggersTest {
 		Test.stopTest();
 	}
 
-	private static testMethod void getTriggerHandlerType_Success(){
+	@isTest
+	private static void getTriggerHandlerType_Success(){
 		Boolean success = true;
 
 		MyTriggerSetting__mdt triggerHandlerSetting = getTriggerHandlingSetting('Account', System.TriggerOperation.BEFORE_INSERT, 'myTriggersTest.AccountHandler');
@@ -525,7 +541,8 @@ private class MyTriggersTest {
 		System.assertEquals(myTriggersTest.AccountHandler.class, triggerHandlerType, 'Type of trigger handler should be found');
 	}
 
-	private static testMethod void getTriggerHandlerType_Failure_NoClassFound(){
+	@isTest
+	private static void getTriggerHandlerType_Failure_NoClassFound(){
 		Boolean success = true;
 
 		MyTriggerSetting__mdt invalidHandlerSetting = getTriggerHandlingSetting('Account', System.TriggerOperation.BEFORE_INSERT, 'InvalidClassname');
@@ -539,7 +556,8 @@ private class MyTriggersTest {
 		System.assertEquals(false, success, 'myTriggers.getTriggerHandlerType should fail for invalid trigger handler classname');
 	}
 
-	private static testMethod void validate_NoError() {
+	@isTest
+	private static void validate_NoError() {
 		Boolean success = true;
 		MyTriggers.qualifiedApiNameMock = 'Account';
 		try {
@@ -550,7 +568,8 @@ private class MyTriggersTest {
 		System.assertEquals(true, success, 'Setting should pass since both sObject fields point to the same object');
 	}
 
-	private static testMethod void validate_ValidException() {
+	@isTest
+	private static void validate_ValidException() {
 		Boolean success = true;
 		MyTriggers.qualifiedApiNameMock = 'Case';
 		try {
@@ -558,7 +577,14 @@ private class MyTriggersTest {
 		} catch(myTriggers.myTriggersException e) {
 			success = false;
 		}
-		System.assertEquals(false, success, 'Setting must raise exception since  sObject fields point to different objects');
+		System.assertEquals(false, success, 'Setting must raise exception since sObject fields point to different objects');
+	}
+
+	@isTest
+	private static void getNamespace_Success() {
+		System.assertEquals('myTriggersTest.AccountHandler'.toUpperCase(),
+		                    myTriggers.getClassNameWithNamespace(getTriggerHandlingSettingsForSObjectType('Account')[0]),
+		                    'Empty namespace in test context, all uppercase');
 	}
 
 }

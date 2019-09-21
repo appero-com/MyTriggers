@@ -124,7 +124,10 @@ global virtual class MyTriggers {
 		executionContextSObjectType = currentSObjectType;
 
 		if (triggerEventsToTriggerHandlers == null || triggerEventsToTriggerHandlers.isEmpty()) {
-			return;
+			if (!Test.isRunningTest()) {
+				return;
+			}
+
 		}
 
 		String eventString = Test.isRunningTest() && triggerEventMock != null ? triggerEventMock : Trigger.operationType.name();
@@ -660,6 +663,7 @@ global virtual class MyTriggers {
 		}
 	}
 
+	@testvisible
 	private static String getClassNameWithNamespace(MyTriggerSetting__mdt triggerHandlerSetting){
 		String namespacePrefix = String.isBlank(triggerHandlerSetting.ClassNamespacePrefix__c) ? '' : triggerHandlerSetting.ClassNamespacePrefix__c;
 		return (String.isBlank(namespacePrefix) ? '' :  namespacePrefix.toUpperCase() + '.') + triggerHandlerSetting.Class__c.toUpperCase();

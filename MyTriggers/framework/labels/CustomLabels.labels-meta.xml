@@ -14,4 +14,11 @@
         <shortDescription>Errors_DuplicateTriggerHandlerClass</shortDescription>
         <value>Duplicate trigger handler &#39;{0}&#39; for event &#39;{1}&#39;</value>
     </labels>
+    <labels>
+        <fullName>Errors_InvalidSettingConfiguration</fullName>
+        <language>de</language>
+        <protected>true</protected>
+        <shortDescription>Errors_InvalidSettingConfiguration</shortDescription>
+        <value>Fatal configuration error on &quot;{0}&quot;: You cannot specify sObject and sObject Override on the same setting with different values. Please check Validation Rule VR01_PreventUseOfBothSObjectFields is active to prevent faulty configuration.</value>
+    </labels>
 </CustomLabels>
