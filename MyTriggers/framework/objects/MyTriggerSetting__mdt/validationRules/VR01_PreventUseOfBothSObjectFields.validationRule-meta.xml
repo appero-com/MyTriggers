@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>VR01_PreventUseOfBothSObjectFields</fullName>
+    <active>true</active>
+    <description>Throws error if both fields - sObject and sObject Override - are used on the same setting.</description>
+    <errorConditionFormula>NOT(ISBLANK(sObject__c)) &amp;&amp; NOT(ISBLANK(sObjectAPIName__c))</errorConditionFormula>
+    <errorMessage>You cannot specifiy sObject and sObject Override on the same setting. VR01</errorMessage>
+</ValidationRule>
