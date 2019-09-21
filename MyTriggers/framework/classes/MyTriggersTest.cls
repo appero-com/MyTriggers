@@ -129,7 +129,7 @@ private class MyTriggersTest {
 		jsonObj.set('Event__c', event.name(), true);
 		jsonObj.set('sObject__c', objTypeName, true);
 		jsonObj.set('Class__c', className, true);
-        MyTriggerSetting__mdt triggerHandlerSetting = (MyTriggerSetting__mdt) jsonObj.deserialize(MyTriggerSetting__mdt.class);
+		MyTriggerSetting__mdt triggerHandlerSetting = (MyTriggerSetting__mdt) jsonObj.deserialize(MyTriggerSetting__mdt.class);
 		return triggerHandlerSetting;
 	}
 
@@ -173,7 +173,7 @@ private class MyTriggersTest {
 		};
 
 		hndl.doConstruct(records);
-		myTriggers.addUpdatedIds(new Set<Id>{UserInfo.getUserId()});
+		myTriggers.addUpdatedIds(new Set<Id> {UserInfo.getUserId()});
 
 		system.assertEquals(true,myTriggers.getUpdatedIds().contains(UserInfo.getUserId()));
 		system.assertEquals(null,hndl.getNonRecursiveRecords().get(0).Id,'should not return any record which id is returned by myTriggers.getUpdatedIds()');
@@ -421,7 +421,7 @@ private class MyTriggersTest {
 		myTriggers.disable(typ);
 
 		// make sure all events are disabled
-		for (System.TriggerOperation tiggerEvent:System.TriggerOperation.values())	{
+		for (System.TriggerOperation tiggerEvent:System.TriggerOperation.values())      {
 			system.assert (myTriggers.isDisabled(typ, tiggerEvent),tiggerEvent.name() + ' shoud be disabled for ' + typ.toString());
 		}
 
@@ -429,7 +429,7 @@ private class MyTriggersTest {
 		// and enable all
 		myTriggers.enable(typ, System.TriggerOperation.values());
 
-		for (System.TriggerOperation tiggerEvent:System.TriggerOperation.values())	{
+		for (System.TriggerOperation tiggerEvent:System.TriggerOperation.values())      {
 			system.assert (!myTriggers.isDisabled(typ, tiggerEvent),tiggerEvent.name() + ' shoud be enabled for ' + typ.toString());
 		}
 
@@ -537,6 +537,67 @@ private class MyTriggersTest {
 		}
 
 		System.assertEquals(false, success, 'myTriggers.getTriggerHandlerType should fail for invalid trigger handler classname');
+	}
+
+	@isTest
+	private static void filterForByPass_AllCases() {
+		List<MyTriggerSetting__mdt> originalTriggerHandlerSettings = getTriggerHandlingSettingsForSObjectType('Account');
+		List<MyTriggerSetting__mdt> filteredTriggerHandlerSettings = new List<MyTriggerSetting__mdt>();
+		filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
+		System.assertEquals (originalTriggerHandlerSettings.size(),
+		                     filteredTriggerHandlerSettings.size(),
+		                     'Default mode without bypass');
+
+		originalTriggerHandlerSettings[0].IsByPassAllowed__c = true;
+		filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
+		System.assertEquals (originalTriggerHandlerSettings.size(),
+		                     filteredTriggerHandlerSettings.size(),
+		                     'Bypass permission active but no custom permission makes no difference');
+
+		//enable permission
+		User userWithCustomPermission = new User (alias = 'test123',
+		                                          email='test123@noegmail.com.invalid',
+		                                          emailencodingkey='UTF-8',
+		                                          firstName='test123',
+		                                          lastname='Testing',
+		                                          languagelocalekey='en_US',
+		                                          localesidkey='en_US', profileid = UserInfo.getProfileId(), country='US',
+		                                          timezonesidkey='Asia/Kolkata', username='test123@noegmail.com.invalid');
+		System.runAs (new User (Id = UserInfo.getUserId())) {
+			insert userWithCustomPermission;
+
+			PermissionSet permSet = new PermissionSet(Label = 'mockPermset', Name = 'mockPermset');
+			insert permSet;
+
+			SetupEntityAccess sea = new SetupEntityAccess(
+				ParentId = permSet.Id,
+				SetupEntityId = [SELECT Id FROM CustomPermission
+				                 WHERE DeveloperName = 'bypassMyTriggers'][0].Id
+				);
+			insert sea;
+
+			PermissionSetAssignment permSetAssignment = new PermissionSetAssignment(
+				AssigneeId = userWithCustomPermission.Id,
+				PermissionSetId = permSet.Id
+				);
+			insert permSetAssignment;
+		}
+
+		System.runAs(userWithCustomPermission) {
+			filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
+			System.assertEquals (originalTriggerHandlerSettings.size(),
+			                     filteredTriggerHandlerSettings.size(),
+			                     'Bypass permission active but no checkbox set makes no difference');
+		}
+
+		System.runAs(userWithCustomPermission) {
+			originalTriggerHandlerSettings[0].IsByPassAllowed__c = true;
+			filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
+			System.assertNotEquals (originalTriggerHandlerSettings.size(),
+			                        filteredTriggerHandlerSettings.size(),
+			                        'Bypass permission active and checkbox set must make a difference');
+		}
+
 	}
 
 }
