@@ -35,7 +35,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>SObject__c</field>
+                <field>sObject__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
@@ -48,7 +48,8 @@
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
-                <emptySpace>true</emptySpace>
+                <behavior>Edit</behavior>
+                <field>isByPassedAllowed__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
@@ -124,7 +125,7 @@
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h0E000000f31y</masterLabel>
+        <masterLabel>00h1j000000c8yA</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>
