@@ -681,23 +681,46 @@ global virtual class MyTriggers {
 		if (Test.isRunningTest() && triggerHandlerSettingMocks != null) {
 			triggerHandlerSettings = triggerHandlerSettingMocks;
 		} else {
-			triggerHandlerSettings = new List<MyTriggerSetting__mdt>(
-				[SELECT DeveloperName,
-				 ClassNamespacePrefix__c,
-				 Event__c,
-				 sObject__c,
-				 sObject__r.QualifiedApiName,
-				 sObjectAPIName__c,
-				 Class__c,
-				 Order__c
-				 FROM MyTriggerSetting__mdt
-				 WHERE Active__c = true
-				                   AND (sObject__r.QualifiedApiName = : sObjectName OR sObjectAPIName__c = : sObjectName)
-				                   ORDER BY Order__c,
-				 DeveloperName ASC]);
+			triggerHandlerSettings = runTriggerHandlerSettingsQuery(sObjectName);
 		}
 
 		return validate(triggerHandlerSettings);
+	}
+
+	@testvisible
+	private static List<MyTriggerSetting__mdt> runTriggerHandlerSettingsQuery(String sObjectName){
+		// Custom Metadata SOQL does neither support the keyword OR
+		// nor disjunctions
+		Map<Id,MyTriggerSetting__mdt> allSettingsMap = new Map<Id,MyTriggerSetting__mdt>();
+		Map<Id,MyTriggerSetting__mdt> settingsQualifiedAPINameMatch =  new Map<Id,MyTriggerSetting__mdt>([SELECT DeveloperName,
+		                                                                                                  ClassNamespacePrefix__c,
+		                                                                                                  Event__c,
+		                                                                                                  sObject__c,
+		                                                                                                  sObject__r.QualifiedApiName,
+		                                                                                                  sObjectAPIName__c,
+		                                                                                                  Class__c,
+		                                                                                                  Order__c
+		                                                                                                  FROM MyTriggerSetting__mdt
+		                                                                                                  WHERE Active__c = true
+		                                                                                                                    AND sObject__r.QualifiedApiName = : sObjectName
+		                                                                                                                                                      ORDER BY Order__c,
+		                                                                                                  DeveloperName ASC]);
+		Map<Id,MyTriggerSetting__mdt> settingsSObjectOverride = new Map<Id,MyTriggerSetting__mdt>([SELECT DeveloperName,
+		                                                                                           ClassNamespacePrefix__c,
+		                                                                                           Event__c,
+		                                                                                           sObject__c,
+		                                                                                           sObject__r.QualifiedApiName,
+		                                                                                           sObjectAPIName__c,
+		                                                                                           Class__c,
+		                                                                                           Order__c
+		                                                                                           FROM MyTriggerSetting__mdt
+		                                                                                           WHERE Active__c = true
+		                                                                                                             AND sObjectAPIName__c = : sObjectName
+		                                                                                                                                     ORDER BY Order__c,
+		                                                                                           DeveloperName ASC]);
+		allSettingsMap.putAll(settingsQualifiedAPINameMatch);
+		allSettingsMap.putAll(settingsSObjectOverride);
+		return allSettingsMap.values();
 	}
 
 

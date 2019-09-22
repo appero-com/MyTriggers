@@ -513,6 +513,10 @@ private class MyTriggersTest {
 		Test.stopTest();
 	}
 
+	/**
+	 * Individual Tests
+	 ********/
+
 	// calls getInsertEvents, getUpdateEvents and getDeleteEvents()
 	@isTest
 	private static void getTypesTest(){
@@ -554,6 +558,19 @@ private class MyTriggersTest {
 		}
 
 		System.assertEquals(false, success, 'myTriggers.getTriggerHandlerType should fail for invalid trigger handler classname');
+	}
+
+	@isTest
+	private static void runQuery_Success() {
+		Exception ex;
+		String errorMsg = '';
+		try {
+			MyTriggers.runTriggerHandlerSettingsQuery('Account');
+		} catch (exception e) {
+			ex =e;
+			errorMsg = e.getMessage();
+		}
+		System.assertEquals(null,ex,'The custom metadata query must run without errors. '+errorMsg);
 	}
 
 	@isTest
