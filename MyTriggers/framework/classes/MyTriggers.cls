@@ -684,7 +684,10 @@ global virtual class MyTriggers {
 			triggerHandlerSettings = runTriggerHandlerSettingsQuery(sObjectName);
 		}
 
-		return validate(triggerHandlerSettings);
+		triggerHandlerSettings = filterForByPass(triggerHandlerSettings);
+		triggerHandlerSettings = validate(triggerHandlerSettings);
+
+		return triggerHandlerSettings;
 	}
 
 	@testvisible
@@ -723,12 +726,21 @@ global virtual class MyTriggers {
 		return allSettingsMap.values();
 	}
 
+	@testvisible
+	private static List<MyTriggerSetting__mdt> filterforBypass(List<MyTriggerSetting__mdt> settings) {
+		List<MyTriggerSetting__mdt> triggerHandlerSettingsFilteredForBypass = new List<MyTriggerSetting__mdt>();
 
-	/**
-	 * Throws exception if setting configuration is faulty
-	 * @param  settings
-	 *
-	 */
+		for (MyTriggerSetting__mdt setting : settings) {
+
+			if (FeatureManagement.checkPermission('bypassMyTriggers')
+			    && setting.IsByPassAllowed__c != null && setting.IsByPassAllowed__c) {
+				continue;
+			}
+			triggerHandlerSettingsFilteredForBypass.add(setting);
+		}
+		return triggerHandlerSettingsFilteredForBypass;
+	}
+
 	@testvisible
 	private static List<MyTriggerSetting__mdt> validate(List<MyTriggerSetting__mdt> settings) {
 		for (MyTriggerSetting__mdt setting : settings) {

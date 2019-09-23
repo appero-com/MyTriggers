@@ -124,12 +124,21 @@ private class MyTriggersTest {
 	}
 
 	private static MyTriggerSetting__mdt getTriggerHandlingSetting(String objTypeName, System.TriggerOperation event, String className){
-		MyTriggerSetting__mdt triggerHandlerSetting = new MyTriggerSetting__mdt(
+		        << << <<< HEAD
+		        MyTriggerSetting__mdt triggerHandlerSetting = new MyTriggerSetting__mdt(
 			DeveloperName = 'TestHandler'+event.name(),
 			Event__c = event.name(),
 			sObject__c = objTypeName,
 			sobjectAPIName__c = objTypeName,
 			Class__c = className);
+		=======
+			JSONObject jsonObj = new JSONObject(new MyTriggerSetting__mdt());
+		jsonObj.set('DeveloperName','TestHandler'+event.name());
+		jsonObj.set('Event__c', event.name(), true);
+		jsonObj.set('sObject__c', objTypeName, true);
+		jsonObj.set('Class__c', className, true);
+		MyTriggerSetting__mdt triggerHandlerSetting = (MyTriggerSetting__mdt) jsonObj.deserialize(MyTriggerSetting__mdt.class);
+		>>> >>>> origin
 		return triggerHandlerSetting;
 	}
 
@@ -602,6 +611,67 @@ private class MyTriggersTest {
 		System.assertEquals('myTriggersTest.AccountHandler'.toUpperCase(),
 		                    myTriggers.getClassNameWithNamespace(getTriggerHandlingSettingsForSObjectType('Account')[0]),
 		                    'Empty namespace in test context, all uppercase');
+	}
+
+	private static void filterForByPass_AllCases() {
+		List<MyTriggerSetting__mdt> originalTriggerHandlerSettings = getTriggerHandlingSettingsForSObjectType('Account');
+		List<MyTriggerSetting__mdt> filteredTriggerHandlerSettings = new List<MyTriggerSetting__mdt>();
+		filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
+		System.assertEquals (originalTriggerHandlerSettings.size(),
+		                     filteredTriggerHandlerSettings.size(),
+		                     'Default mode without bypass');
+
+		originalTriggerHandlerSettings[0].IsByPassAllowed__c = true;
+		filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
+		System.assertEquals (originalTriggerHandlerSettings.size(),
+		                     filteredTriggerHandlerSettings.size(),
+		                     'Bypass checkbox active but no custom permission makes no difference');
+
+		//enable permission
+		User userWithCustomPermission = new User (alias = 'test123',
+		                                          email='test123@noegmail.com.invalid',
+		                                          emailencodingkey='UTF-8',
+		                                          firstName='test123',
+		                                          lastname='Testing',
+		                                          languagelocalekey='en_US',
+		                                          localesidkey='en_US', profileid = UserInfo.getProfileId(), country='US',
+		                                          timezonesidkey='Asia/Kolkata', username='test123@noegmail.com.invalid');
+		System.runAs (new User (Id = UserInfo.getUserId())) {
+			insert userWithCustomPermission;
+
+			PermissionSet permSet = new PermissionSet(Label = 'mockPermset', Name = 'mockPermset');
+			insert permSet;
+
+			SetupEntityAccess sea = new SetupEntityAccess(
+				ParentId = permSet.Id,
+				SetupEntityId = [SELECT Id FROM CustomPermission
+				                 WHERE DeveloperName = 'bypassMyTriggers'][0].Id
+				);
+			insert sea;
+
+			PermissionSetAssignment permSetAssignment = new PermissionSetAssignment(
+				AssigneeId = userWithCustomPermission.Id,
+				PermissionSetId = permSet.Id
+				);
+			insert permSetAssignment;
+		}
+
+		System.runAs(userWithCustomPermission) {
+			originalTriggerHandlerSettings[0].IsByPassAllowed__c = null;
+			filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
+			System.assertEquals (originalTriggerHandlerSettings.size(),
+			                     filteredTriggerHandlerSettings.size(),
+			                     'Bypass permission active but no checkbox set makes no difference');
+		}
+
+		System.runAs(userWithCustomPermission) {
+			originalTriggerHandlerSettings[0].IsByPassAllowed__c = true;
+			filteredTriggerHandlerSettings = myTriggers.filterForBypass(originalTriggerHandlerSettings);
+			System.assertNotEquals (originalTriggerHandlerSettings.size(),
+			                        filteredTriggerHandlerSettings.size(),
+			                        'Bypass permission active and checkbox set must make a difference');
+		}
+
 	}
 
 }
