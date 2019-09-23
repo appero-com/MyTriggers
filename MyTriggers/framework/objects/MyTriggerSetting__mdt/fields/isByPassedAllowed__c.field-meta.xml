@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsByPassedAllowed__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>If true, will this setting will not be run for any user that has the byPass MyTrigger Custom Permission assigned</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>If true, will this setting will not be run for any user that has the byPass MyTrigger Custom Permission assigned</inlineHelpText>
+    <label>Allow Bypass</label>
+    <type>Checkbox</type>
+</CustomField>
