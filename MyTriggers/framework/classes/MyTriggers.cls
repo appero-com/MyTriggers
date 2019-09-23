@@ -26,6 +26,9 @@ global virtual class MyTriggers {
 	@TestVisible
 	private static String triggerEventMock;
 
+	@Testvisible
+	private static String qualifiedApiNameMock;
+
 	/**
 	 * cast records to appropriate sObjectType in implementations
 	 */
@@ -121,7 +124,10 @@ global virtual class MyTriggers {
 		executionContextSObjectType = currentSObjectType;
 
 		if (triggerEventsToTriggerHandlers == null || triggerEventsToTriggerHandlers.isEmpty()) {
-			return;
+			if (!Test.isRunningTest()) {
+				return;
+			}
+
 		}
 
 		String eventString = Test.isRunningTest() && triggerEventMock != null ? triggerEventMock : Trigger.operationType.name();
@@ -657,6 +663,7 @@ global virtual class MyTriggers {
 		}
 	}
 
+	@testvisible
 	private static String getClassNameWithNamespace(MyTriggerSetting__mdt triggerHandlerSetting){
 		String namespacePrefix = String.isBlank(triggerHandlerSetting.ClassNamespacePrefix__c) ? '' : triggerHandlerSetting.ClassNamespacePrefix__c;
 		return (String.isBlank(namespacePrefix) ? '' :  namespacePrefix.toUpperCase() + '.') + triggerHandlerSetting.Class__c.toUpperCase();
@@ -670,29 +677,53 @@ global virtual class MyTriggers {
 	private static List<MyTriggerSetting__mdt> getTriggerHandlerSettings(sObjectType objectType){
 		String sObjectName = objectType.getDescribe().getName();
 		List<MyTriggerSetting__mdt> triggerHandlerSettings;
-		List<MyTriggerSetting__mdt> triggerHandlerSettingsFilteredForBypass = new List<MyTriggerSetting__mdt>();
 
 		if (Test.isRunningTest() && triggerHandlerSettingMocks != null) {
 			triggerHandlerSettings = triggerHandlerSettingMocks;
 		} else {
-			triggerHandlerSettings = new List<MyTriggerSetting__mdt>([SELECT DeveloperName,
-			                                                          ClassNamespacePrefix__c,
-			                                                          Event__c,
-			                                                          IsBypassAllowed__c,
-			                                                          sObject__c,
-			                                                          sObject__r.QualifiedApiName,
-			                                                          Class__c,
-			                                                          Order__c
-			                                                          FROM MyTriggerSetting__mdt
-			                                                          WHERE sObject__r.QualifiedApiName = : sObjectName
-			                                                                                              AND Active__c = true
-			                                                                                                              ORDER BY Order__c,
-			                                                          DeveloperName ASC]);
+			triggerHandlerSettings = runTriggerHandlerSettingsQuery(sObjectName);
 		}
 
 		triggerHandlerSettings = filterForByPass(triggerHandlerSettings);
+		triggerHandlerSettings = validate(triggerHandlerSettings);
 
 		return triggerHandlerSettings;
+	}
+
+	@testvisible
+	private static List<MyTriggerSetting__mdt> runTriggerHandlerSettingsQuery(String sObjectName){
+		// Custom Metadata SOQL does neither support the keyword OR
+		// nor disjunctions
+		Map<Id,MyTriggerSetting__mdt> allSettingsMap = new Map<Id,MyTriggerSetting__mdt>();
+		Map<Id,MyTriggerSetting__mdt> settingsQualifiedAPINameMatch =  new Map<Id,MyTriggerSetting__mdt>([SELECT DeveloperName,
+		                                                                                                  ClassNamespacePrefix__c,
+		                                                                                                  Event__c,
+		                                                                                                  sObject__c,
+		                                                                                                  sObject__r.QualifiedApiName,
+		                                                                                                  sObjectAPIName__c,
+		                                                                                                  Class__c,
+		                                                                                                  Order__c
+		                                                                                                  FROM MyTriggerSetting__mdt
+		                                                                                                  WHERE Active__c = true
+		                                                                                                                    AND sObject__r.QualifiedApiName = : sObjectName
+		                                                                                                                                                      ORDER BY Order__c,
+		                                                                                                  DeveloperName ASC]);
+		Map<Id,MyTriggerSetting__mdt> settingsSObjectOverride = new Map<Id,MyTriggerSetting__mdt>([SELECT DeveloperName,
+		                                                                                           ClassNamespacePrefix__c,
+		                                                                                           Event__c,
+		                                                                                           sObject__c,
+		                                                                                           sObject__r.QualifiedApiName,
+		                                                                                           sObjectAPIName__c,
+		                                                                                           Class__c,
+		                                                                                           Order__c
+		                                                                                           FROM MyTriggerSetting__mdt
+		                                                                                           WHERE Active__c = true
+		                                                                                                             AND sObjectAPIName__c = : sObjectName
+		                                                                                                                                     ORDER BY Order__c,
+		                                                                                           DeveloperName ASC]);
+		allSettingsMap.putAll(settingsQualifiedAPINameMatch);
+		allSettingsMap.putAll(settingsSObjectOverride);
+		return allSettingsMap.values();
 	}
 
 	@testvisible
@@ -708,6 +739,18 @@ global virtual class MyTriggers {
 			triggerHandlerSettingsFilteredForBypass.add(setting);
 		}
 		return triggerHandlerSettingsFilteredForBypass;
+	}
+
+	@testvisible
+	private static List<MyTriggerSetting__mdt> validate(List<MyTriggerSetting__mdt> settings) {
+		for (MyTriggerSetting__mdt setting : settings) {
+			if(setting.sObject__c != null && setting.sObjectAPIName__c != null) {
+				String qualifiedAPIName = Test.isRunningTest() ? qualifiedApiNameMock : setting.sObject__r.QualifiedAPIName;
+				if (qualifiedAPIName != setting.sObjectAPIName__c)
+					throw new myTriggersException(String.format(Label.Errors_InvalidSettingConfiguration, new List<String> {setting.developerName}));
+			}
+		}
+		return settings;
 	}
 
 }

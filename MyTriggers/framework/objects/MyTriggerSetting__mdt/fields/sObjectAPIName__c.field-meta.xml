@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>sObjectAPIName__c</fullName>
+    <description>Should only be used IF a sObject type is not available in the sObject picklist. Picklist takes precedence over this field. Field requires fully qualified API Name (namespace__CustomObject__c)</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Should only be used IF a sObject type is not available in the sObject picklist. Picklist takes precedence over this field. Field requires fully qualified API Name (namespace__CustomObject__c)</inlineHelpText>
+    <label>sObject Override</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
