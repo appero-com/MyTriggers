@@ -3,7 +3,9 @@
   "country": "US",
   "language": "en_US",
   "edition": "Developer",
-  "orgPreferences": {
-    "enabled": ["S1DesktopEnabled"]
+  "settings": {
+    "orgPreferenceSettings": {
+      "s1DesktopEnabled": true
+    }
   }
 }
