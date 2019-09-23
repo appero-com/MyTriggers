@@ -124,21 +124,12 @@ private class MyTriggersTest {
 	}
 
 	private static MyTriggerSetting__mdt getTriggerHandlingSetting(String objTypeName, System.TriggerOperation event, String className){
-		        << << <<< HEAD
-		        MyTriggerSetting__mdt triggerHandlerSetting = new MyTriggerSetting__mdt(
+		MyTriggerSetting__mdt triggerHandlerSetting = new MyTriggerSetting__mdt(
 			DeveloperName = 'TestHandler'+event.name(),
 			Event__c = event.name(),
 			sObject__c = objTypeName,
 			sobjectAPIName__c = objTypeName,
 			Class__c = className);
-		=======
-			JSONObject jsonObj = new JSONObject(new MyTriggerSetting__mdt());
-		jsonObj.set('DeveloperName','TestHandler'+event.name());
-		jsonObj.set('Event__c', event.name(), true);
-		jsonObj.set('sObject__c', objTypeName, true);
-		jsonObj.set('Class__c', className, true);
-		MyTriggerSetting__mdt triggerHandlerSetting = (MyTriggerSetting__mdt) jsonObj.deserialize(MyTriggerSetting__mdt.class);
-		>>> >>>> origin
 		return triggerHandlerSetting;
 	}
 
