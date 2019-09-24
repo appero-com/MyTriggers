@@ -1,38 +1,51 @@
 # MyTriggers
 
-  Lightweight Custom Metadata driven Trigger Framework that scales to your needs. Extended from [TriggerX](https://github.com/se6wagner/TriggerX) by Seb Wagner, provided with <3 by appero.com
+Lightweight Custom Metadata driven Trigger Framework that scales to your needs. Extended from [TriggerX](https://github.com/se6wagner/TriggerX) by Seb Wagner, provided with <3 by appero.com
+
+## ChangeLog
+
+### 09-2019
+
+- added `SObjectApiName__c` to `MyTrigger Settings` to accomodate for sObjects not available in the `sObject` picklist
+- added `IsByPassAllowed__c` to `MyTrigger Settings` and a custom permission `bypassMyTriggers`. This allows exclude certain users from trigger execution.
+
+### 10-2018
+
+- initial release
 
 ## Installation
 
 ### Developer Controlled Package
 
-* Production Instances: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1i000000gZ4HAAU
-* Sandbox Instances: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1i000000gZ4HAAU
+- Production Instances: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1i000000gZ4HAAU
+- Sandbox Instances: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1i000000gZ4HAAU
+
 ### From Source
+
 Clone this repo
 
 ```
 git clone https://github.com/appero-com/MyTriggers
 ```
 
-Create a scratch org and push source 
+Create a scratch org and push source
+
 ```
 sfdx force:org:create -a MyTriggers -s -f config/project-scratch-def.json && sfdx force:source:push -r MyTriggers/framework
 ```
 
-or deploy to your org 
+or deploy to your org
 
 ```
 sfdx force:source:convert -r MyTriggers/framework -d src && sfdx force:mdapi:deploy -u <username> -d src
 ```
 
-
 ## Resources
 
 [TriggerX by Sebastian Wagner](https://github.com/se6wagner/TriggerX)
 
-
 ## Issues / Known Limitations
+
 - Custom Metadata Types cannot reference `User sObject` currently.
 
 Found something? Use the issues page
@@ -42,14 +55,15 @@ Found something? Use the issues page
 PRs are welcome
 
 # MyTriggers HowTo
-MyTriggers is a lightweight Custom Metadata driven Trigger Framework that scales to your needs. 
-It is based upon the foundation of [TriggerX that Sebastian Wagner wrote in 2013](https://github.com/se6wagner/TriggerX), which was a perfect starting point since it covered all one could wish for in a trigger handler except Custom Metadata Types. 
+
+MyTriggers is a lightweight Custom Metadata driven Trigger Framework that scales to your needs.
+It is based upon the foundation of [TriggerX that Sebastian Wagner wrote in 2013](https://github.com/se6wagner/TriggerX), which was a perfect starting point since it covered all one could wish for in a trigger handler except Custom Metadata Types.
 
 The general approach behind MyTriggers is
 
-* run all triggers through one central handler, even across namespaces. 
-* design the orchestration of logic in a way that allows you to declarative wire things differently
-* think about Triggers in new ways: configurable, closer to business needs/processes than database changes 
+- run all triggers through one central handler, even across namespaces.
+- design the orchestration of logic in a way that allows you to declarative wire things differently
+- think about Triggers in new ways: configurable, closer to business needs/processes than database changes
 
 ## Dreamforce 2018: "Route Your Triggers Like a Pro"
 
@@ -62,47 +76,45 @@ You can follow Szandor on Twitter at [@ch_sz_knapp](https://twitter.com/ch_sz_kn
 ## A change in perspective - a Business Process Centric Approach
 
 When you reflect upon what your triggers actually do, you may hardly ever say that they are pieces of code that react to changes in data whenever they happen.
-You'd rather describe them as *entry points for your business processes* that, for example, create an onboarding case for new customers whenever an opportunity closes, but only for accounts that never had a closed opportunity before.
+You'd rather describe them as _entry points for your business processes_ that, for example, create an onboarding case for new customers whenever an opportunity closes, but only for accounts that never had a closed opportunity before.
 
 Now, with that description in mind, we should build our trigger handlers in a way that they can react to change in business requirements, and that they handle a lot more than just the records that initially started the process.
 
-This is why MyTriggers has a *records* property that contains any sObject type (but all the records that are handled currently), and this is why there are Custom Metadata Type records that can be activated, grouped by names, put in a sequential orders (and re-ordered if need be).
+This is why MyTriggers has a _records_ property that contains any sObject type (but all the records that are handled currently), and this is why there are Custom Metadata Type records that can be activated, grouped by names, put in a sequential orders (and re-ordered if need be).
 
 You decide what happens when a trigger fires - the constant is that it will always open one central instance of MyTriggers that orchestrates your business processes according to your Metadata config.
 
 ## General Design
 
-* Trigger execution will be started by instantion of MyTriggers and calling the run() method from a Trigger
-* records contains all objects currently handled by the trigger context
-* recordsNotYetProcessed can be inspected through their getter method
-* Ids of updated records can be accessed through their getter method
-* handled trigger contexts can be accessed through their setter method
-* you can enable() or disable() specific handler steps or trigger contexts at runtime
-* for each handler step, MyTriggers has to be extended
-* each handler step orchestrates its logic through overriding methods specific for the trigger contexts.
-	* onBeforeInsert()
-	* onAfterInsert()
-	* onBeforeUpdate()
-	* onAfterUpdate()
-	* onBeforeDelete()
-	* onAfterDelete()
-	* onAfterUndelete()
-	
+- Trigger execution will be started by instantion of MyTriggers and calling the run() method from a Trigger
+- records contains all objects currently handled by the trigger context
+- recordsNotYetProcessed can be inspected through their getter method
+- Ids of updated records can be accessed through their getter method
+- handled trigger contexts can be accessed through their setter method
+- you can enable() or disable() specific handler steps or trigger contexts at runtime
+- for each handler step, MyTriggers has to be extended
+- each handler step orchestrates its logic through overriding methods specific for the trigger contexts.
+  _ onBeforeInsert()
+  _ onAfterInsert()
+  _ onBeforeUpdate()
+  _ onAfterUpdate()
+  _ onBeforeDelete()
+  _ onAfterDelete() \* onAfterUndelete()
+
 ## Registering MyTriggers for all Trigger contexts
 
 For MyTriggers to handle your triggers, create a Trigger for _all_ contexts. Create a new instance of MyTriggers and call `run()`.
 
-
 ```
 Trigger AccountTrigger on Account (
-	before insert, 
-	before update, 
-	before delete, 
-	after insert, 
-	after update, 
-	after delete, 
+	before insert,
+	before update,
+	before delete,
+	after insert,
+	after update,
+	after delete,
 	after undelete) {
-	
+
 	MyTriggers.run();
 
 }
@@ -112,81 +124,78 @@ Trigger AccountTrigger on Account (
 
 Each handler step should extend the MyTriggers class and can override any of the methods.
 
-
 ```
 public class newAccounts_ValidateType extends MyTriggers {
-	
+
 
 	public override void onBeforeInsert() {
 		List<Account> newAccounts = (List<Account>)records;
     	}
-	
+
 	private void stepLogic() {
 		// some method to handle the logic
 	}
 }
 ```
 
-
-
-
 ## Working With the "records" Propery
 
-MyTriggers exposes a public instance variable *records* that contains all records that are handled by MyTriggers. When working with the *records* property,
+MyTriggers exposes a public instance variable _records_ that contains all records that are handled by MyTriggers. When working with the _records_ property,
 you should cast it to a specific type.
 
 ```
 (List<Account>)records
 ```
 
-MyTriggers has a helper property for you to control your the process flow: *recordsNotYetProcessed*. You can access it through its getter method, Same goes for updated records - you can access their Ids through a getter
+MyTriggers has a helper property for you to control your the process flow: _recordsNotYetProcessed_. You can access it through its getter method, Same goes for updated records - you can access their Ids through a getter
 
 ## Registering Steps For Execution
+
 The execution flow is controlled by custom metadata records of the MyTriggerSetting type.
 You have to specify
 
-* an sObject Type of a standard or custom object or a platform event
-* a class that contains your logic for this step
-* a trigger context
+- an sObject Type of a standard or custom object or a platform event
+- a class that contains your logic for this step
+- a trigger context
 
 Additionally, you should set
 
-* the activation flag
-* a sequence number
+- the activation flag
+- a sequence number
 
-Optionally, set 
+Optionally, set
 
-* a namespace prefix for the class that you are going to call if you want to call (or build) namespaced trigger handler steps.
+- a namespace prefix for the class that you are going to call if you want to call (or build) namespaced trigger handler steps.
 
 ### One Word About Sequence Numbering
 
-It doesn't really matter which sequence numbering you choose as long as it can be sorted. To avoid renumbering a whole set of steps, choose a numbering method that allows for gaps. 
+It doesn't really matter which sequence numbering you choose as long as it can be sorted. To avoid renumbering a whole set of steps, choose a numbering method that allows for gaps.
 
 Classic ERP numbering styles and sequence might make you smile - but if your initial numbering sequence was 100, 200, 300, 400, 500 ..., you can add 190 and 210 later, and 195 and 215... without renumbering the whole list if you add one step inbetween.
 
 ### Deactivating Triggers
 
-MyTriggers allows you to deactivate or re-wire Trigger steps in productive environments. But just because it is possible does not mean that it is a good idea, necessarily. 
+MyTriggers allows you to deactivate or re-wire Trigger steps in productive environments. But just because it is possible does not mean that it is a good idea, necessarily.
 
 Be **extra careful** when you **deactivate** or **modify** productive Trigger handler steps and keep a reminder that works for you (sticky notes, an alarm clock) so that you don't forget to activate your triggers again.
 
 ## Enable Steps Or Trigger Contexts at Runtime
 
-MyTriggers allows total control over all trigger operation at runtime. 
+MyTriggers allows total control over all trigger operation at runtime.
 
 ```
 public override void onAfterInsert() {
-        
+
         // records property provided by myTriggers
         List<Account> newAccounts = new Map<Id,Map>(records);
-        
+
         // disable after insert trigger on Opp so it doesn't interfere
         myTriggers.disable(myCaseTrigger.class,
                            new List<System.TriggerOperation>{
                                System.TriggerOperation.AFTER_UPDATE});
-       
+
         CaseService.updateCustomerCareCases(newAccounts);
-    }  
+    }
 ```
 
 ## Finding Out If (And Which) Data Has Changed
@@ -204,9 +213,8 @@ sObjectField[] fieldsToCheck = new sObjectField[]{Share__c.Multiplier__c, Share_
 
 for (sObjectField field : MyTriggers.getChangedFields(fieldsToCheck,record,recordOld)){
 	// process field
-} 
+}
 ```
-
 
 ## Recursion control
 
@@ -224,8 +232,8 @@ List<Sobject> untouchedRecords = MyTriggers.getRecordsNotYetProcessed();
 
 [global virtual class MyTriggers](MyTriggers.cls#L16)
 
-Leightweight Custom Metadata driven Trigger Framework that scales to your needs  
-  
+Leightweight Custom Metadata driven Trigger Framework that scales to your needs
+
 : info@appero.com
 
 ## Properties
@@ -238,170 +246,169 @@ cast records to appropriate sObjectType in implementations
 
 ## Methods
 
--   [addUpdatedIds](#addUpdatedIds)
-    
-    add set of ids to updatedIds
-    
--   [disable](#disable)
-    
-    disable disables all events for System.Type MyClass
-    
--   [disable](#disable)
-    
-    disable disables all events for the trigger handler with given namespace and classname Method also works in subscriber org with hidden (public) trigger handlers from managed package
-    
--   [disable](#disable)
-    
-    disable disable all specificed events for the System.Type MyClass
-    
--   [disable](#disable)
-    
-    disable all specificed events for given ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
-    
--   [disable](#disable)
-    
-    disable a single event for System.Type MyClass
-    
--   [disable](#disable)
-    
-    disable a single event for ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
-    
--   [doConstruct](#doConstruct)
-    
-    used instead of constructor since handlers are instanciated with an empty contructor
-    
--   [enable](#enable)
-    
-    removes all disabled events for the System.Type MyClass
-    
--   [enable](#enable)
-    
-    removes all disabled events for given ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
-    
--   [enable](#enable)
-    
-    enable all specificed events for the System.Type MyClass
-    
--   [enable](#enable)
-    
-    enable all specificed events for given ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
-    
--   [enable](#enable)
-    
-    enable a single event for System.Type MyClass
-    
--   [enable](#enable)
-    
-    enable a single event for ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
-    
--   [getAfterEvents](#getAfterEvents)
-    
-    getAfterEvents list of all AFTER System.TriggerOperation enums
-    
--   [getBeforeEvents](#getBeforeEvents)
-    
-    getBeforeEvents list of all BEFORE System.TriggerOperation enums
-    
--   [getChangedFields](#getChangedFields)
-    
-    returns a list of changed fields based on provided fieldList list
-    
--   [getChangedFields](#getChangedFields)
-    
-    returns a list of changed fields based on provided fieldList list
-    
--   [getDeleteEvents](#getDeleteEvents)
-    
-    getDeleteEvents all delete events
-    
--   [getDisabledEvents](#getDisabledEvents)
-    
-    returns set of disabled events
-    
--   [getDisabledEvents](#getDisabledEvents)
-    
-    returns set of disabled events Method also works in subscriber org with hidden (public) trigger handlers from managed package
-    
--   [getInsertEvents](#getInsertEvents)
-    
-    getInsertEvents all insert events
-    
--   [getRecordsNotYetProcessed](#getRecordsNotYetProcessed)
-    
-    returns a list of objects that have not been processed yet
-    
--   [getUpdatedIds](#getUpdatedIds)
-    
-    return all updated ids
-    
--   [getUpdateEvents](#getUpdateEvents)
-    
-    getUpdateEvents all update events
-    
--   [hasChangedFields](#hasChangedFields)
-    
-    returns true if a value of one of the specified fields has changed
-    
--   [hasChangedFields](#hasChangedFields)
-    
-    returns true if a value of one of the specified fields has changed
-    
--   [isDisabled](#isDisabled)
-    
-    isDisabled returns true if the specified event is disabled
-    
--   [isDisabled](#isDisabled)
-    
-    isDisabled returns true if the specified event is disabled Method also works in subscriber org with hidden (public) trigger handlers from managed package
-    
--   [myTriggers](#myTriggers)
-    
-    Global Constructor reserved for future use
-    
--   [onAfterDelete](#onAfterDelete)
-    
-    executed to perform AFTER\_DELETE operations
-    
--   [onAfterInsert](#onAfterInsert)
-    
-    executed to perform AFTER\_INSERT operations
-    
--   [onAfterUndelete](#onAfterUndelete)
-    
-    executed to perform AFTER\_UNDELETE operations
-    
--   [onAfterUpdate](#onAfterUpdate)
-    
-    executed to perform AFTER\_UPDATE operations
-    
--   [onBeforeDelete](#onBeforeDelete)
-    
-    executed to perform BEFORE\_DELETE operations
-    
--   [onBeforeInsert](#onBeforeInsert)
-    
-    executed to perform BEFORE\_INSERT operations
-    
--   [onBeforeUpdate](#onBeforeUpdate)
-    
-    executed to perform BEFORE\_UPDATE operations
-    
--   [run](#run)
-    
-    Entry point of myTriggers framework - called from implementations
-    
--   [setAllowedTriggerEvents](#setAllowedTriggerEvents)
-    
-    loads trigger event settings MyTriggerSetting\_\_mdt
-    
--   [setAllowedTriggerEvents](#setAllowedTriggerEvents)
-    
-    loads trigger event settings MyTriggerSetting\_\_mdt Method also works in subscriber org with hidden (public) trigger handlers from managed package
-    
--   [toStringEvents](#toStringEvents)
-    
-    converts a Set of Event enums into Strings
-    
+- [addUpdatedIds](#addUpdatedIds)
+
+  add set of ids to updatedIds
+
+- [disable](#disable)
+
+  disable disables all events for System.Type MyClass
+
+- [disable](#disable)
+
+  disable disables all events for the trigger handler with given namespace and classname Method also works in subscriber org with hidden (public) trigger handlers from managed package
+
+- [disable](#disable)
+
+  disable disable all specificed events for the System.Type MyClass
+
+- [disable](#disable)
+
+  disable all specificed events for given ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
+
+- [disable](#disable)
+
+  disable a single event for System.Type MyClass
+
+- [disable](#disable)
+
+  disable a single event for ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
+
+- [doConstruct](#doConstruct)
+
+  used instead of constructor since handlers are instanciated with an empty contructor
+
+- [enable](#enable)
+
+  removes all disabled events for the System.Type MyClass
+
+- [enable](#enable)
+
+  removes all disabled events for given ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
+
+- [enable](#enable)
+
+  enable all specificed events for the System.Type MyClass
+
+- [enable](#enable)
+
+  enable all specificed events for given ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
+
+- [enable](#enable)
+
+  enable a single event for System.Type MyClass
+
+- [enable](#enable)
+
+  enable a single event for ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
+
+- [getAfterEvents](#getAfterEvents)
+
+  getAfterEvents list of all AFTER System.TriggerOperation enums
+
+- [getBeforeEvents](#getBeforeEvents)
+
+  getBeforeEvents list of all BEFORE System.TriggerOperation enums
+
+- [getChangedFields](#getChangedFields)
+
+  returns a list of changed fields based on provided fieldList list
+
+- [getChangedFields](#getChangedFields)
+
+  returns a list of changed fields based on provided fieldList list
+
+- [getDeleteEvents](#getDeleteEvents)
+
+  getDeleteEvents all delete events
+
+- [getDisabledEvents](#getDisabledEvents)
+
+  returns set of disabled events
+
+- [getDisabledEvents](#getDisabledEvents)
+
+  returns set of disabled events Method also works in subscriber org with hidden (public) trigger handlers from managed package
+
+- [getInsertEvents](#getInsertEvents)
+
+  getInsertEvents all insert events
+
+- [getRecordsNotYetProcessed](#getRecordsNotYetProcessed)
+
+  returns a list of objects that have not been processed yet
+
+- [getUpdatedIds](#getUpdatedIds)
+
+  return all updated ids
+
+- [getUpdateEvents](#getUpdateEvents)
+
+  getUpdateEvents all update events
+
+- [hasChangedFields](#hasChangedFields)
+
+  returns true if a value of one of the specified fields has changed
+
+- [hasChangedFields](#hasChangedFields)
+
+  returns true if a value of one of the specified fields has changed
+
+- [isDisabled](#isDisabled)
+
+  isDisabled returns true if the specified event is disabled
+
+- [isDisabled](#isDisabled)
+
+  isDisabled returns true if the specified event is disabled Method also works in subscriber org with hidden (public) trigger handlers from managed package
+
+- [myTriggers](#myTriggers)
+
+  Global Constructor reserved for future use
+
+- [onAfterDelete](#onAfterDelete)
+
+  executed to perform AFTER_DELETE operations
+
+- [onAfterInsert](#onAfterInsert)
+
+  executed to perform AFTER_INSERT operations
+
+- [onAfterUndelete](#onAfterUndelete)
+
+  executed to perform AFTER_UNDELETE operations
+
+- [onAfterUpdate](#onAfterUpdate)
+
+  executed to perform AFTER_UPDATE operations
+
+- [onBeforeDelete](#onBeforeDelete)
+
+  executed to perform BEFORE_DELETE operations
+
+- [onBeforeInsert](#onBeforeInsert)
+
+  executed to perform BEFORE_INSERT operations
+
+- [onBeforeUpdate](#onBeforeUpdate)
+
+  executed to perform BEFORE_UPDATE operations
+
+- [run](#run)
+
+  Entry point of myTriggers framework - called from implementations
+
+- [setAllowedTriggerEvents](#setAllowedTriggerEvents)
+
+  loads trigger event settings MyTriggerSetting\_\_mdt
+
+- [setAllowedTriggerEvents](#setAllowedTriggerEvents)
+
+  loads trigger event settings MyTriggerSetting\_\_mdt Method also works in subscriber org with hidden (public) trigger handlers from managed package
+
+- [toStringEvents](#toStringEvents)
+
+  converts a Set of Event enums into Strings
 
 ## addUpdatedIds
 
@@ -437,7 +444,6 @@ disable all specificed events for the System.Type MyClass
 [global static void disable(String namespacePrefix, String className, System.TriggerOperation\[\] events)](MyTriggers.cls#L460)
 
 disable all specificed events for given ClassName and Namespace Also works in subscriber org with packaged public trigger handlers implementing MyTriggers
-
 
 ## disable
 
@@ -509,7 +515,6 @@ getAfterEvents list of all AFTER System.TriggerOperation enums
 
 getBeforeEvents list of all BEFORE System.TriggerOperation enums
 
-
 ## getChangedFields
 
 [global static String\[\] getChangedFields(String\[\] fieldList, sObject record, sObject recordOld)](MyTriggers.cls#L217)
@@ -521,7 +526,6 @@ returns a list of changed fields based on provided fieldList list
 [global static sObjectField\[\] getChangedFields(sObjectField\[\] fieldList, sObject record, sObject recordOld)](MyTriggers.cls#L237)
 
 returns a list of changed fields based on provided fieldList list
-
 
 ## getDeleteEvents
 
@@ -537,7 +541,7 @@ returns set of disabled events
 
 ### Return Value
 
-- Set of disabled Event Namens (e.g. 'AFTER\_UPDATE')
+- Set of disabled Event Namens (e.g. 'AFTER_UPDATE')
 
 ## getDisabledEvents
 
@@ -611,43 +615,43 @@ Global Constructor reserved for future use
 
 [global virtual void onAfterDelete()](MyTriggers.cls#L87)
 
-executed to perform AFTER\_DELETE operations
+executed to perform AFTER_DELETE operations
 
 ## onAfterInsert
 
 [global virtual void onAfterInsert()](MyTriggers.cls#L65)
 
-executed to perform AFTER\_INSERT operations
+executed to perform AFTER_INSERT operations
 
 ## onAfterUndelete
 
 [global virtual void onAfterUndelete()](MyTriggers.cls#L92)
 
-executed to perform AFTER\_UNDELETE operations
+executed to perform AFTER_UNDELETE operations
 
 ## onAfterUpdate
 
 [global virtual void onAfterUpdate(Map<Id,sObject> triggerOldMap)](MyTriggers.cls#L77)
 
-executed to perform AFTER\_UPDATE operations
+executed to perform AFTER_UPDATE operations
 
 ## onBeforeDelete
 
 [global virtual void onBeforeDelete()](MyTriggers.cls#L82)
 
-executed to perform BEFORE\_DELETE operations
+executed to perform BEFORE_DELETE operations
 
 ## onBeforeInsert
 
 [global virtual void onBeforeInsert()](MyTriggers.cls#L60)
 
-executed to perform BEFORE\_INSERT operations
+executed to perform BEFORE_INSERT operations
 
 ## onBeforeUpdate
 
 [global virtual void onBeforeUpdate(Map<Id,sObject> triggerOldMap)](MyTriggers.cls#L71)
 
-executed to perform BEFORE\_UPDATE operations
+executed to perform BEFORE_UPDATE operations
 
 ## run
 
