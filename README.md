@@ -7,7 +7,7 @@ Lightweight Custom Metadata driven Trigger Framework that scales to your needs. 
 ### 09-2019
 
 - added `SObjectApiName__c` to `MyTrigger Settings` to accomodate for sObjects not available in the `sObject` picklist
-- added `IsByPassAllowed__c` to `MyTrigger Settings` and a custom permission `bypassMyTriggers`. This allows exclude certain users from trigger execution.
+- added `IsByPassAllowed__c` to `MyTrigger Settings` and a custom permission `bypassMyTriggers`. This allows for excluding certain users from trigger execution (e.g. Integration User).
 
 ### 10-2018
 
@@ -45,8 +45,6 @@ sfdx force:source:convert -r MyTriggers/framework -d src && sfdx force:mdapi:dep
 [TriggerX by Sebastian Wagner](https://github.com/se6wagner/TriggerX)
 
 ## Issues / Known Limitations
-
-- Custom Metadata Types cannot reference `User sObject` currently.
 
 Found something? Use the issues page
 
