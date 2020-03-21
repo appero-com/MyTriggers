@@ -758,7 +758,20 @@ global virtual class MyTriggers {
 
 	@testvisible
 	private static void sortTriggerEventsToTriggerHandlers() {
-		system.debug(triggerEventsToTriggerHandlers);
+		for (String event : triggerEventsToTriggerHandlers.keyset()) {
+			//system.debug('FW       '+event);
+
+			triggerEventsToTriggerHandlers.get(event).sort();
+			List<MyTriggerSetting__mdt> reversed = new List<MyTriggerSetting__mdt>();
+			for(Integer i = triggerEventsToTriggerHandlers.get(event).size() - 1; i >= 0; i--) {
+				reversed.add(triggerEventsToTriggerHandlers.get(event)[i]);
+			}
+			triggerEventsToTriggerHandlers.put(event,reversed);
+
+			// for (MyTriggerSetting__mdt setting : triggerEventsToTriggerHandlers.get(event)) {
+			// 	system.debug('FW              '+Integer.valueOf(setting.Order__c)+'-'+setting.sObject__c+'-'+setting.DeveloperName);
+			// }
+		}
 	}
 
 	@testvisible
