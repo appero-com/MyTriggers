@@ -5,3 +5,7 @@
 package.xml
 **profile**
 AppSwitcher
+
+**/jsconfig.json
+
+**/.eslintrc.json

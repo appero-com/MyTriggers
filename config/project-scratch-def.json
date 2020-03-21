@@ -1,11 +1,6 @@
 {
-  "orgName": "Demo Company",
+  "orgName": "MyTriggers Scratch",
   "country": "US",
   "language": "en_US",
-  "edition": "Developer",
-  "settings": {
-    "orgPreferenceSettings": {
-      "s1DesktopEnabled": true
-    }
-  }
+  "edition": "Developer"
 }
