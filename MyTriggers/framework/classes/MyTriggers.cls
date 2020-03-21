@@ -118,9 +118,9 @@ global virtual class MyTriggers {
 			currentSObjectType = Trigger.new != null ? Trigger.new.getSObjectType() : Trigger.old.getSObjectType();
 		}
 
-		if (currentSObjectType != executionContextSObjectType) {
-			setTriggerHandlerMaps(currentSObjectType);
-		}
+		//if (currentSObjectType != executionContextSObjectType) {
+		setTriggerHandlerMaps(currentSObjectType);
+		//}
 		executionContextSObjectType = currentSObjectType;
 
 		if (triggerEventsToTriggerHandlers == null || triggerEventsToTriggerHandlers.isEmpty()) {
@@ -138,9 +138,17 @@ global virtual class MyTriggers {
 			return;
 		}
 
+		if (processedTriggerHandlerSettings == null) {
+			processedTriggerHandlerSettings = new Set<String>();
+		}
+		//system.debug('FW    We processed: ' + processedTriggerHandlerSettings);
 		for (MyTriggerSetting__mdt triggerHandlerSetting : triggerHandlerSettings) {
 			Type handlerType = getTriggerHandlerType(triggerHandlerSetting.ClassNamespacePrefix__c, triggerHandlerSetting.Class__c);
-			run(handlerType);
+			if (!processedTriggerHandlerSettings.contains(triggerHandlerSetting.DeveloperName)) {
+				system.debug('FW   now running: '+ Integer.valueOf(triggerHandlerSetting.Order__c) +' '+ triggerHandlerSetting.Class__c + ' for ' + triggerHandlerSetting.sObject__c + ' and event: ' +triggerHandlerSetting.Event__c + ' -' + triggerHandlerSetting.DeveloperName);
+				processedTriggerHandlerSettings.add(triggerHandlerSetting.DeveloperName);
+				run(handlerType);
+			}
 		}
 	}
 
@@ -553,6 +561,12 @@ global virtual class MyTriggers {
 	@TestVisible
 	private static SObjectType executionContextSObjectType;
 
+	@TestVisible
+	private static Set<sObjectType> knownExecutionContextSobjectTypes;
+
+	@TestVisible
+	private static Set<String> processedTriggerHandlerSettings;
+
 	private static Set<String> namespacePrefixes;
 
 	private static Map<String, List<MyTriggerSetting__mdt> > triggerEventsToTriggerHandlers;
@@ -608,7 +622,6 @@ global virtual class MyTriggers {
 				handler.doConstruct(triggerNew).onAfterInsert();
 			}
 			else if (isUpdate && !disabledTriggerEvents.contains(System.TriggerOperation.AFTER_UPDATE.name())) {
-				system.debug('On After Handler: ' + handler);
 				handler.doConstruct(triggerNew).onAfterUpdate(triggerOldMap);
 			}
 			else if (isDelete && !disabledTriggerEvents.contains(System.TriggerOperation.AFTER_DELETE.name())) {
@@ -647,8 +660,12 @@ global virtual class MyTriggers {
 	 */
 	@TestVisible
 	private static void setTriggerHandlerMaps(sObjectType objectType) {
-		triggerEventsToTriggerHandlers = new Map<String, List<MyTriggerSetting__mdt> >();
-		handlerClassesToTriggerHandlers = new Map<String, List<MyTriggerSetting__mdt> >();
+		if (triggerEventsToTriggerHandlers == null) {
+			triggerEventsToTriggerHandlers = new Map<String, List<MyTriggerSetting__mdt> >();
+		}
+		if (handlerClassesToTriggerHandlers == null) {
+			handlerClassesToTriggerHandlers = new Map<String, List<MyTriggerSetting__mdt> >();
+		}
 		for (MyTriggerSetting__mdt triggerSetting : getTriggerHandlerSettings(objectType)) {
 			if (!triggerEventsToTriggerHandlers.containsKey(triggerSetting.Event__c)) {
 				triggerEventsToTriggerHandlers.put(triggerSetting.Event__c, new List<MyTriggerSetting__mdt>());
@@ -661,6 +678,9 @@ global virtual class MyTriggers {
 			}
 			handlerClassesToTriggerHandlers.get(classWithNamespaceKey).add(triggerSetting);
 		}
+		sortTriggerEventsToTriggerHandlers();
+		//System.debug('FW events ' +triggerEventsToTriggerHandlers.keySet());
+		//System.debug('FW classes ' +handlerClassesToTriggerHandlers.keySet());
 	}
 
 	@testvisible
@@ -675,13 +695,23 @@ global virtual class MyTriggers {
 	 * @return triggerHandlerSetting for sObjectType
 	 */
 	private static List<MyTriggerSetting__mdt> getTriggerHandlerSettings(sObjectType objectType){
+		// if already seen, return empty list
+		if (knownExecutionContextSobjectTypes == null) {
+			knownExecutionContextSobjectTypes = new Set<sObjectType>();
+		}
 		String sObjectName = objectType.getDescribe().getName();
 		List<MyTriggerSetting__mdt> triggerHandlerSettings;
 
 		if (Test.isRunningTest() && triggerHandlerSettingMocks != null) {
 			triggerHandlerSettings = triggerHandlerSettingMocks;
 		} else {
-			triggerHandlerSettings = runTriggerHandlerSettingsQuery(sObjectName);
+			if (knownExecutionContextSobjectTypes.contains(objectType)) {
+				//system.assert (false, 'wtf');
+				triggerHandlerSettings = new List<MyTriggerSetting__mdt>();
+			} else {
+				triggerHandlerSettings = runTriggerHandlerSettingsQuery(sObjectName);
+				knownExecutionContextSobjectTypes.add(objectType);
+			}
 		}
 
 		triggerHandlerSettings = filterForByPass(triggerHandlerSettings);
@@ -724,6 +754,11 @@ global virtual class MyTriggers {
 		allSettingsMap.putAll(settingsQualifiedAPINameMatch);
 		allSettingsMap.putAll(settingsSObjectOverride);
 		return allSettingsMap.values();
+	}
+
+	@testvisible
+	private static void sortTriggerEventsToTriggerHandlers() {
+		system.debug(triggerEventsToTriggerHandlers);
 	}
 
 	@testvisible
