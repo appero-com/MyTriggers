@@ -758,9 +758,30 @@ global virtual class MyTriggers {
 
 	@testvisible
 	private static void sortTriggerEventsToTriggerHandlers() {
-		for (String event : triggerEventsToTriggerHandlers.keyset()) {
-			//system.debug('FW       '+event);
 
+		for (String event : triggerEventsToTriggerHandlers.keyset()) {
+
+			List<MyTriggerSetting__mdt> triggerSettings = triggerEventsToTriggerHandlers.get(event);
+			Map<String, MyTriggerSetting__mdt> triggerSettingMap = new Map<String, MyTriggerSetting__mdt>();
+			List<String> triggerSettingSortKeys = new List<String>();
+			List<MyTriggerSetting__mdt> sortedTriggerSettings = new List<MyTriggerSetting__mdt>();
+
+			for (MyTriggerSetting__mdt triggerSetting : triggerSettings) {
+				String sortKey = leftPadWithZero(triggerSetting.Order__c, 4);
+				triggerSettingSortKeys.add(sortKey);
+				triggerSettingMap.put(sortKey, triggerSetting);
+			}
+
+			triggerSettingSortKeys.sort();
+
+			for (String s : triggerSettingSortKeys) {
+				sortedTriggerSettings.add(triggerSettingMap.get(s));
+			}
+
+			triggerEventsToTriggerHandlers.put(event, sortedTriggerSettings);
+
+			//system.debug('FW       '+event);
+			/*
 			triggerEventsToTriggerHandlers.get(event).sort();
 			List<MyTriggerSetting__mdt> reversed = new List<MyTriggerSetting__mdt>();
 			for(Integer i = triggerEventsToTriggerHandlers.get(event).size() - 1; i >= 0; i--) {
@@ -771,7 +792,32 @@ global virtual class MyTriggers {
 			// for (MyTriggerSetting__mdt setting : triggerEventsToTriggerHandlers.get(event)) {
 			// 	system.debug('FW              '+Integer.valueOf(setting.Order__c)+'-'+setting.sObject__c+'-'+setting.DeveloperName);
 			// }
+
+			 */
 		}
+	}
+
+	/**
+	 * converts the input object to a string of at least the length given as the second parameter
+	 *
+	 * @param Object toPad
+	 * @param Integer targetLength the desired length
+	 *
+	 * @return
+	 */
+	@testvisible static String leftPadWithZero(Object toPad, Integer targetLength) {
+
+		String targetString = String.valueOf(toPad);
+
+		if (targetString.length() > targetLength) {
+			return targetString;
+		}
+
+		while (targetString.length() < targetLength) {
+			targetString = '0' + targetString;
+		}
+
+		return targetString;
 	}
 
 	@testvisible
