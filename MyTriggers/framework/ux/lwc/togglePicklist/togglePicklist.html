@@ -1,0 +1,25 @@
+<template>
+
+    <div class="slds-text-align_center slds-border_right slds-border_left slds-border_bottom slds-border_top">
+        
+        <span class="slds-badge ">{title}</span>
+
+        <lightning-layout horizontal-align="space" multiple-rows="true">
+            <template for:each={options} for:item="item">
+                <lightning-layout-item padding="around-small" key={item.value}>
+                    <c-toggle-picklist-item value={item.value} label={item.label} is-selected={item.isSelected} onchange={handleToggleChange}></c-toggle-picklist-item>
+                </lightning-layout-item>
+            </template>
+        </lightning-layout>
+        <div class="slds-text-align_right slds-m-around_small">
+            <lightning-layout horizontal-align="end" multiple-rows="true">
+                <lightning-layout-item>
+                    <a class="slds-p-around_small" onclick={handleCheckAll}>Check All</a>
+                </lightning-layout-item>
+                <lightning-layout-item>
+                    <a class="slds-p-around_small" onclick={handleUncheckAll}>Uncheck All</a>
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,15 @@
+<template>
+
+    <lightning-layout vertical-align="stretch">
+        <template for:each={elements} for:item='item'>
+            <template if:true={item}>
+                <lightning-layout-item key={item.key} size={item.size} class="custom-box">
+                    
+                    <c-cell-component label={item.label} value={item.id} changed={item.isChanged}></c-cell-component>
+                </lightning-layout-item>
+            </template>
+        </template>
+        
+    </lightning-layout>
+
+</template>

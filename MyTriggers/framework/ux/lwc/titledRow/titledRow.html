@@ -1,0 +1,13 @@
+<template>
+    <lightning-layout>
+        <lightning-layout-item size={titleSize} class="custom-box custom-vertical-align">
+            {title}
+        </lightning-layout-item>
+
+        <lightning-layout-item size={contentSize}>
+            <div class={scrollableClass} onscroll={handleScroll}>
+                <slot></slot>
+            </div>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>

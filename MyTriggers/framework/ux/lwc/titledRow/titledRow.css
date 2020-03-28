@@ -1,0 +1,11 @@
+.custom-box {
+    text-align: center;
+    background-color: #f4f6f9;
+    border: 1px solid #d8dde6;
+}
+.custom-vertical-align {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+}
