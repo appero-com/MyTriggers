@@ -733,7 +733,7 @@ global virtual class MyTriggers {
 			for (MyTriggerSetting__mdt triggerSetting : triggerSettings) {
 				String sObjectName = !String.isBlank(triggerSetting.sObject__c) ? triggerSetting.sObject__c : triggerSetting.sObjectAPIName__c;
 				String order = String.valueOf(triggerSetting.Order__c);
-				String sortKey = sObjectName+createLPadSortKey(order, 6);
+				String sortKey = sObjectName+createLPadSortKey(order, 50-sObjectName.length());
 				triggerSettingSortKeys.add(sortKey);
 				triggerSettingMap.put(sortKey, triggerSetting);
 			}
