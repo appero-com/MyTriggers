@@ -118,16 +118,14 @@ global virtual class MyTriggers {
 			currentSObjectType = Trigger.new != null ? Trigger.new.getSObjectType() : Trigger.old.getSObjectType();
 		}
 
-		if (currentSObjectType != executionContextSObjectType) {
-			setTriggerHandlerMaps(currentSObjectType);
-		}
+		setTriggerHandlerMaps(currentSObjectType);
+
 		executionContextSObjectType = currentSObjectType;
 
 		if (triggerEventsToTriggerHandlers == null || triggerEventsToTriggerHandlers.isEmpty()) {
 			if (!Test.isRunningTest()) {
 				return;
 			}
-
 		}
 
 		String eventString = Test.isRunningTest() && triggerEventMock != null ? triggerEventMock : Trigger.operationType.name();
@@ -138,9 +136,16 @@ global virtual class MyTriggers {
 			return;
 		}
 
+		if (processedTriggerHandlerSettings == null) {
+			processedTriggerHandlerSettings = new Set<String>();
+		}
+
 		for (MyTriggerSetting__mdt triggerHandlerSetting : triggerHandlerSettings) {
 			Type handlerType = getTriggerHandlerType(triggerHandlerSetting.ClassNamespacePrefix__c, triggerHandlerSetting.Class__c);
-			run(handlerType);
+			if (!processedTriggerHandlerSettings.contains(triggerHandlerSetting.DeveloperName)) {
+				processedTriggerHandlerSettings.add(triggerHandlerSetting.DeveloperName);
+				run(handlerType);
+			}
 		}
 	}
 
@@ -553,10 +558,18 @@ global virtual class MyTriggers {
 	@TestVisible
 	private static SObjectType executionContextSObjectType;
 
+	@TestVisible
+	private static Set<sObjectType> knownExecutionContextSobjectTypes;
+
+	@TestVisible
+	private static Set<String> processedTriggerHandlerSettings;
+
 	private static Set<String> namespacePrefixes;
 
+	@TestVisible
 	private static Map<String, List<MyTriggerSetting__mdt> > triggerEventsToTriggerHandlers;
 
+	@TestVisible
 	private static Map<String, List<MyTriggerSetting__mdt> > handlerClassesToTriggerHandlers;
 
 	/**
@@ -608,7 +621,6 @@ global virtual class MyTriggers {
 				handler.doConstruct(triggerNew).onAfterInsert();
 			}
 			else if (isUpdate && !disabledTriggerEvents.contains(System.TriggerOperation.AFTER_UPDATE.name())) {
-				system.debug('On After Handler: ' + handler);
 				handler.doConstruct(triggerNew).onAfterUpdate(triggerOldMap);
 			}
 			else if (isDelete && !disabledTriggerEvents.contains(System.TriggerOperation.AFTER_DELETE.name())) {
@@ -647,8 +659,12 @@ global virtual class MyTriggers {
 	 */
 	@TestVisible
 	private static void setTriggerHandlerMaps(sObjectType objectType) {
-		triggerEventsToTriggerHandlers = new Map<String, List<MyTriggerSetting__mdt> >();
-		handlerClassesToTriggerHandlers = new Map<String, List<MyTriggerSetting__mdt> >();
+		if (triggerEventsToTriggerHandlers == null) {
+			triggerEventsToTriggerHandlers = new Map<String, List<MyTriggerSetting__mdt> >();
+		}
+		if (handlerClassesToTriggerHandlers == null) {
+			handlerClassesToTriggerHandlers = new Map<String, List<MyTriggerSetting__mdt> >();
+		}
 		for (MyTriggerSetting__mdt triggerSetting : getTriggerHandlerSettings(objectType)) {
 			if (!triggerEventsToTriggerHandlers.containsKey(triggerSetting.Event__c)) {
 				triggerEventsToTriggerHandlers.put(triggerSetting.Event__c, new List<MyTriggerSetting__mdt>());
@@ -661,6 +677,7 @@ global virtual class MyTriggers {
 			}
 			handlerClassesToTriggerHandlers.get(classWithNamespaceKey).add(triggerSetting);
 		}
+		sortTriggerEventsToTriggerHandlers();
 	}
 
 	@testvisible
@@ -675,13 +692,21 @@ global virtual class MyTriggers {
 	 * @return triggerHandlerSetting for sObjectType
 	 */
 	private static List<MyTriggerSetting__mdt> getTriggerHandlerSettings(sObjectType objectType){
+		// if already seen, return empty list
+		if (knownExecutionContextSobjectTypes == null) {
+			knownExecutionContextSobjectTypes = new Set<sObjectType>();
+		}
 		String sObjectName = objectType.getDescribe().getName();
 		List<MyTriggerSetting__mdt> triggerHandlerSettings;
 
-		if (Test.isRunningTest() && triggerHandlerSettingMocks != null) {
-			triggerHandlerSettings = triggerHandlerSettingMocks;
+		if (knownExecutionContextSobjectTypes.contains(objectType)) {
+			triggerHandlerSettings = new List<MyTriggerSetting__mdt>();
 		} else {
 			triggerHandlerSettings = runTriggerHandlerSettingsQuery(sObjectName);
+			knownExecutionContextSobjectTypes.add(objectType);
+			if (Test.isRunningTest() && triggerHandlerSettingMocks != null) {
+				triggerHandlerSettings = triggerHandlerSettingMocks;
+			}
 		}
 
 		triggerHandlerSettings = filterForByPass(triggerHandlerSettings);
@@ -690,10 +715,47 @@ global virtual class MyTriggers {
 		return triggerHandlerSettings;
 	}
 
+	/**
+	 * MyTrigger Settings need to be sorted
+	 * in order to preserve configured order
+	 * over several distinct trigger contexts
+	 */
 	@testvisible
-	private static List<MyTriggerSetting__mdt> runTriggerHandlerSettingsQuery(String sObjectName){
-		// Custom Metadata SOQL does neither support the keyword OR
-		// nor disjunctions
+	private static void sortTriggerEventsToTriggerHandlers() {
+
+		for (String event : triggerEventsToTriggerHandlers.keyset()) {
+
+			List<MyTriggerSetting__mdt> triggerSettings = triggerEventsToTriggerHandlers.get(event);
+			Map<String, MyTriggerSetting__mdt> triggerSettingMap = new Map<String, MyTriggerSetting__mdt>();
+			List<String> triggerSettingSortKeys = new List<String>();
+			List<MyTriggerSetting__mdt> sortedTriggerSettings = new List<MyTriggerSetting__mdt>();
+
+			for (MyTriggerSetting__mdt triggerSetting : triggerSettings) {
+				String sObjectName = !String.isBlank(triggerSetting.sObject__c) ? triggerSetting.sObject__c : triggerSetting.sObjectAPIName__c;
+				String order = String.valueOf(triggerSetting.Order__c);
+				String sortKey = sObjectName+createLPadSortKey(order, 50-sObjectName.length());
+				triggerSettingSortKeys.add(sortKey);
+				triggerSettingMap.put(sortKey, triggerSetting);
+			}
+
+			triggerSettingSortKeys.sort();
+
+			for (String sortKey : triggerSettingSortKeys) {
+				sortedTriggerSettings.add(triggerSettingMap.get(sortKey));
+			}
+
+			triggerEventsToTriggerHandlers.put(event, sortedTriggerSettings);
+		}
+	}
+
+	/**
+	 * Gets current MyTrigger Settings for fiven sObject
+	 * Since CMDT do not support disjunction, two queries are needed
+	 * @param  sObjectName
+	 * @return             List of MyTrigger Settings
+	 */
+	@testvisible
+	private static List<MyTriggerSetting__mdt> runTriggerHandlerSettingsQuery(String sObjectName) {
 		Map<Id,MyTriggerSetting__mdt> allSettingsMap = new Map<Id,MyTriggerSetting__mdt>();
 		Map<Id,MyTriggerSetting__mdt> settingsQualifiedAPINameMatch =  new Map<Id,MyTriggerSetting__mdt>([SELECT DeveloperName,
 		                                                                                                  ClassNamespacePrefix__c,
@@ -726,6 +788,35 @@ global virtual class MyTriggers {
 		return allSettingsMap.values();
 	}
 
+	/**
+	 * Left pads the key to at least the length given as the second parameter
+	 * @param key
+	 * @param targetLength
+	 * @return		newSortKey
+	 */
+	@testvisible
+	private static String createLPadSortKey(String key, Integer targetLength) {
+		if (key == null) {
+			return key;
+		}
+
+		if (key.length() >= targetLength) {
+			return key;
+		}
+
+		while (key.length() < targetLength) {
+			key = '0' + key;
+		}
+
+		return key;
+	}
+
+	/**
+	 * Returns only those settings for which the current user
+	 * does not need to bypass
+	 * @param  settings
+	 * @return          filtered Settings
+	 */
 	@testvisible
 	private static List<MyTriggerSetting__mdt> filterforBypass(List<MyTriggerSetting__mdt> settings) {
 		List<MyTriggerSetting__mdt> triggerHandlerSettingsFilteredForBypass = new List<MyTriggerSetting__mdt>();
@@ -741,6 +832,12 @@ global virtual class MyTriggers {
 		return triggerHandlerSettingsFilteredForBypass;
 	}
 
+	/**
+	 * Ensures all TriggeerSettings have a valid sObject attached
+	 * throws exception if invalid setting is found
+	 * @param  settings
+	 * @return          valid Settings
+	 */
 	@testvisible
 	private static List<MyTriggerSetting__mdt> validate(List<MyTriggerSetting__mdt> settings) {
 		for (MyTriggerSetting__mdt setting : settings) {

@@ -191,7 +191,7 @@ private class MyTriggersTest {
 	@isTest
 	private static void fromControlTest(){
 
-		Type typ = AccountHandler.class;
+		Type currentType = AccountHandler.class;
 
 		// list of Event strings to disable
 		System.TriggerOperation[] triggerEvents = System.TriggerOperation.values();
@@ -208,12 +208,12 @@ private class MyTriggersTest {
 		myTriggers.setTriggerHandlerMaps(Account.getSObjectType());
 
 		// load Controls
-		myTriggers.setAllowedTriggerEvents(typ,true);
+		myTriggers.setAllowedTriggerEvents(currentType,true);
 
 		// make sure all events are disabled
 		for (System.TriggerOperation tiggerEvent:triggerEvents)
 		{
-			system.assert (myTriggers.isDisabled(typ, tiggerEvent),tiggerEvent.name() + ' should be disabled because no active handler setting available');
+			system.assert (myTriggers.isDisabled(currentType, tiggerEvent),tiggerEvent.name() + ' should be disabled because no active handler setting available');
 		}
 
 		Test.stopTest();
@@ -223,9 +223,9 @@ private class MyTriggersTest {
 	@isTest
 	private static void fromControlTest_publicManagedHandlers(){
 
-		Type typ = AccountHandler.class;
+		Type currentType = AccountHandler.class;
 		String namespacePrefix = '';
-		String className = typ.getName();
+		String className = currentType.getName();
 
 		// list of Event strings to disable
 		System.TriggerOperation[] triggerEvents = System.TriggerOperation.values();
@@ -546,6 +546,35 @@ private class MyTriggersTest {
 	}
 
 	@isTest
+	private static void setTriggerHandlerMaps_Success() {
+		List<MyTriggerSetting__mdt> settings = new List<MyTriggerSetting__mdt> { getMyTriggerSetting('Account', 'Random9345AccountSetting', 0, 'AccountClass', 'BEFORE_INSERT')};
+		MyTriggers.triggerHandlerSettingMocks = settings;
+		MyTriggers.setTriggerHandlerMaps(Account.sObjectType);
+		System.assertEquals(1, MyTriggers.triggerEventsToTriggerHandlers.keySet().size(), 'Trigger Event Map correctly instantiated');
+		System.assertEquals(1, MyTriggers.handlerClassesToTriggerHandlers.keySet().size(), 'Class Map correctly instantiated');
+	}
+
+
+	@isTest
+	private static void sortTriggerEventsToTriggerHandlers_Success() {
+		MyTriggers.triggerEventsToTriggerHandlers = new Map<String,List<MyTriggerSetting__mdt> > {
+			'BEFORE_INSERT' => new List<MyTriggerSetting__mdt> {
+				getMyTriggerSetting('Account', 'Random9345AccountSetting', 7, 'AccountClass', 'BEFORE_INSERT'),
+				getMyTriggerSetting('Contact', '009345ContactSetting', 0, 'ContactClass', 'BEFORE_INSERT'),
+				getMyTriggerSetting('Account', '00Random9345AccountSetting', 3, 'AccountClass', 'BEFORE_INSERT'),
+				getMyTriggerSetting('Contact', '9345ContactSetting', 1, 'ContactClass', 'BEFORE_INSERT'),
+				getMyTriggerSetting('Account', '00Random9345AccountSetting', 0, 'AccountClass', 'BEFORE_INSERT'),
+				getMyTriggerSetting('Contact', '009345ContactSetting', 2, 'ContactClass', 'BEFORE_INSERT')
+			}
+		};
+		MyTriggers.sortTriggerEventsToTriggerHandlers();
+		List<MyTriggerSetting__mdt> sortedResults = MyTriggers.triggerEventsToTriggerHandlers.get('BEFORE_INSERT');
+		system.assertEquals(0, sortedResults[0].Order__c, 'Order must be respected');
+		system.assertEquals(7, sortedResults[2].Order__c, 'Order must be respected');
+		system.assertEquals(2, sortedResults[5].Order__c, 'Order must be respected');
+	}
+
+	@isTest
 	private static void getTriggerHandlerType_Failure_NoClassFound(){
 		Boolean success = true;
 
@@ -604,6 +633,7 @@ private class MyTriggersTest {
 		                    'Empty namespace in test context, all uppercase');
 	}
 
+	@isTest
 	private static void filterForByPass_AllCases() {
 		List<MyTriggerSetting__mdt> originalTriggerHandlerSettings = getTriggerHandlingSettingsForSObjectType('Account');
 		List<MyTriggerSetting__mdt> filteredTriggerHandlerSettings = new List<MyTriggerSetting__mdt>();
@@ -662,7 +692,25 @@ private class MyTriggersTest {
 			                        filteredTriggerHandlerSettings.size(),
 			                        'Bypass permission active and checkbox set must make a difference');
 		}
+	}
 
+	@isTest
+	private static void createLPadSortKey_Success() {
+		system.assertEquals(10, MyTriggers.createLPadSortKey('four',10).length(), 'Expected length returned');
+		system.assertEquals('000000four', MyTriggers.createLPadSortKey('four',10), 'Expected format returned');
+	}
+
+	private static MyTriggerSetting__mdt getMyTriggerSetting(String sObjectName, String developerName, Integer order, String className, String triggerEvent) {
+		MyTriggerSetting__mdt setting = new MyTriggerSetting__mdt(
+			DeveloperName = developerName,
+			sObject__c = sObjectName,
+			Class__c = className,
+			Active__c = true,
+			Order__c = order,
+			Event__c = triggerEvent
+			);
+
+		return setting;
 	}
 
 }
