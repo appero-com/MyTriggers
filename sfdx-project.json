@@ -15,7 +15,7 @@
     ],
     "namespace": "",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "46.0",
+    "sourceApiVersion": "48.0",
     "packageAliases": {
         "MyTriggers": "0Ho1i0000000001CAA",
         "MyTriggers@0.1.0-1": "04t1i000000gNXOAA2",
