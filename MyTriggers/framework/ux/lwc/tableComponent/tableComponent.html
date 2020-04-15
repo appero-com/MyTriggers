@@ -1,0 +1,73 @@
+<template>
+
+    <div class="info uiMessage" role="alert" data-aura-class="uiMessage">
+        <div class="uiBlock" data-aura-class="uiBlock">
+            <div class="bRight">
+                <a class="close">×</a>
+            </div>
+            <div class="bBody">
+                <h4>Information</h4>
+                Double click on the table cell to edit Custom Metadata Records.
+            </div>
+        </div>
+    </div>
+    <!-- Rows -->
+    <lightning-layout multiple-rows="true">
+
+        <!-- Header row -->
+        <lightning-layout-item size="12">
+                
+            <c-titled-row>
+                <c-titled-row scrollable="true" oncustomscroll={handleScrollBottom}>
+                    <c-row-component elements={ghostHeaders}></c-row-component>
+                </c-titled-row>
+            </c-titled-row>
+
+            <c-titled-row>
+                <c-titled-row scrollable="false">
+                    <c-row-component elements={_headers}></c-row-component>
+                </c-titled-row>
+            </c-titled-row>
+
+        </lightning-layout-item>
+
+            <!-- Data row -->
+        <lightning-layout-item size="12">
+
+            <template for:each={rows} for:item="triggerDml">
+                <template if:true={triggerDml}>
+                    <c-titled-row key={triggerDml.key} title={triggerDml.title}>
+                        <lightning-layout multiple-rows="true" vertical-align="stretch">
+                            <template for:each={triggerDml.rows} for:item="timingItem">
+                                <template if:true={timingItem}>
+                                    <lightning-layout-item key={timingItem.key} size="12">
+                                        <c-titled-row title={timingItem.title}>
+                                            <template if:true={timingItem.isMultipleRows}>
+                                                <template for:each={timingItem.elements} for:item="rowy">
+                                                    <template if:true={rowy}>
+                                                        <c-row-component key={rowy.key} elements={rowy.elements}></c-row-component>
+                                                    </template>
+                                                </template>
+                                            </template>
+                                            <template if:false={timingItem.isMultipleRows}>
+                                                <c-row-component elements={timingItem.elements}></c-row-component>
+                                            </template>
+                                    
+                                        </c-titled-row>
+                                    </lightning-layout-item>
+                                </template>
+                            </template>
+                        </lightning-layout>
+                    </c-titled-row>
+                </template>
+            </template>
+
+            <c-titled-row>
+                <c-titled-row scrollable="true" oncustomscroll={handleScrollBottom}>
+                    <c-row-component elements={ghostHeaders}></c-row-component>
+                </c-titled-row>
+            </c-titled-row>
+
+        </lightning-layout-item>
+    </lightning-layout>
+</template>

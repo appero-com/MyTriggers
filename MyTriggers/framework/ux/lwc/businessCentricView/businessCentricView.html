@@ -1,0 +1,40 @@
+<template>
+
+    <lightning-layout multiple-rows="true">
+        <lightning-layout-item size="3">
+            <div class="slds-p-around_small">
+                <c-business-centric-filter 
+                    onfilterchange={handleFilterChange}
+                    options={filterOptions}>
+            
+                </c-business-centric-filter>
+            </div>
+        </lightning-layout-item>
+        <lightning-layout-item size="9">
+            <div class="slds-p-around_small">
+                <c-table-component headers={headers} rows={rows}>
+            
+                </c-table-component>
+            </div>
+
+            <div class="slds-border_top slds-p-top_small slds-p-left_small">
+                <template if:true={isAnyChanged}>
+                    <lightning-button variant="brand" 
+                                  label="Save Changes" 
+                                  title="Save Changes" 
+                                  onclick={handleSaveChanges}>
+                        </lightning-button>
+                </template>
+                
+                <template if:false={isAnyChanged}>
+                    <lightning-button variant="brand" 
+                                  label="Save Changes" 
+                                  title="Save Changes" 
+                                  disabled>
+                        </lightning-button>
+                </template>
+                
+            </div>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>

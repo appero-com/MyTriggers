@@ -1,0 +1,41 @@
+<template>
+
+    <template if:true={isDeploying}>
+        <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+    </template>
+
+    <c-modal-window title="Update Custom Metadata"  
+                    footer-buttons={modalButtons}
+                    width="slds-modal_medium"
+                    onokclick={handleOkClick} onkeyup={handleKeyPress}>
+        <c-metadata-edit-form record={currentRecord}
+                              onmetadatachange={handleMetadataChange}
+                              sobject-options={sobjectOptions}>
+                              
+        </c-metadata-edit-form>
+    </c-modal-window>
+
+    <lightning-tabset variant="scoped">
+
+        <lightning-tab label="Business-centric">
+            <c-business-centric-view custom-metadata={mdt} 
+                                     oncelldblclick={handleCellDblClick}
+                                     onsavechangedclick={handleSaveChangedClick}>
+            </c-business-centric-view>
+        </lightning-tab>
+
+        <lightning-tab label="Sobject-centric">
+            <c-sobject-centric-view custom-metadata={mdt}
+                                    oncelldblclick={handleCellDblClick}
+                                    onsavechangedclick={handleSaveChangedClick}></c-sobject-centric-view>
+        </lightning-tab>
+
+        <lightning-tab label="Event-centric">
+            <c-event-centric-view custom-metadata={mdt}
+                                  oncelldblclick={handleCellDblClick}
+                                  onsavechangedclick={handleSaveChangedClick}></c-event-centric-view>
+        </lightning-tab>
+    </lightning-tabset>
+
+    
+</template>

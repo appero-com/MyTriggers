@@ -1,0 +1,33 @@
+<template>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_2-of-2">
+            <lightning-combobox
+                name="Sobjectchoosen"
+                label="Sobject"
+                placeholder="Select Sobject"
+                options={optionsSobjects}
+                value={valueSobjects}
+                onchange={handleSobjectChange}></lightning-combobox>
+        </div>
+        <div class="slds-col slds-size_2-of-2 slds-m-top_small">
+
+            <c-toggle-picklist options={optionsClasses} onchange={handleClassChange} title="Choose Classes"></c-toggle-picklist>
+        </div>
+        
+        <div class="slds-col slds-size_2-of-2 slds-m-top_small">
+            <c-toggle-picklist options={optionsBA} onchange={handleDMLTimingChange} title="When?"></c-toggle-picklist>
+            <!--<lightning-checkbox-group name=""
+                                label="When?"
+                                options={optionsBA}
+                                value={valueBA}
+                                onchange={handleDMLTimingChange}></lightning-checkbox-group>-->
+        </div>
+        <div class="slds-col slds-size_2-of-2 slds-m-top_small">
+            <c-toggle-picklist options={optionsCRUD} onchange={handleDMLTypeChange} title="DML type"></c-toggle-picklist>
+            <!--<lightning-checkbox-group label="DML type"
+                                options={optionsCRUD}
+                                value={valueCRUD}
+                                onchange={handleDMLTypeChange}></lightning-checkbox-group>-->
+        </div>
+    </div>
+</template>

@@ -1,0 +1,100 @@
+<template>
+
+    <lightning-layout vertical-align="stretch" multiple-rows="true" onkeyup={handleKeyUp}>
+
+        <lightning-layout-item size="6">
+            <lightning-input type="text"
+                             label="Label" 
+                             class="slds-m-around_medium"
+                             value={record.Label}
+                             onchange={handleChangeLabel}></lightning-input>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-input type="text" 
+                             label="MyTrigger Setting Name" 
+                             class="slds-m-around_medium"
+                             value={record.DeveloperName} 
+                             disabled></lightning-input>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-input type="checkbox" 
+                             label="Active" 
+                             class="slds-m-around_medium"
+                             checked={record.Active__c}
+                             onchange={handleChangeActive}></lightning-input>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-input type="checkbox" 
+                             label="Allow Bypass" 
+                             class="slds-m-around_medium"
+                             checked={record.IsBypassAllowed__c}
+                             onchange={handleChangeBypassAllowed}></lightning-input>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-combobox name="progress" 
+                                label="sObject"
+                                placeholder="sObject" 
+                                class="slds-m-around_medium" 
+                                options={sobjectOptions}
+                                value={record.sObject__c}
+                                onchange={handleChangeSobject}></lightning-combobox>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-combobox name="progress"
+                                label="Event"
+                                placeholder="Event" 
+                                class="slds-m-around_medium"
+                                options={eventOptions}
+                                value={record.Event__c}
+                                onchange={handleChangeEvent}></lightning-combobox>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-input type="text" 
+                             label="sObject Override" 
+                             class="slds-m-around_medium"
+                             value={record.sObjectAPIName__c}
+                             onchange={handleChangeSobjectOverride}></lightning-input>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-input type="number" 
+                             label="Order" 
+                             class="slds-m-around_medium"
+                             value={record.Order__c}
+                             onchange={handleChangeOrder}></lightning-input>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-input type="text" 
+                             label="Class Namespace Prefix" 
+                             class="slds-m-around_medium"
+                             value={record.ClassNamespacePrefix__c}
+                             onchange={handleChangeClassNamespace}></lightning-input>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="6">
+            <lightning-input type="text" 
+                             label="Class" 
+                             class="slds-m-around_medium"
+                             value={record.Class__c}
+                             onchange={handleChangeClass}></lightning-input>
+        </lightning-layout-item>
+
+        <lightning-layout-item size="12">
+            <lightning-textarea name="input1" 
+                                label="Description" 
+                                class="slds-m-around_medium"
+                                value={record.Description__c}
+                                onchange={handleChangeDescription}></lightning-textarea>
+        </lightning-layout-item>
+        
+
+    </lightning-layout>
+    
+</template>

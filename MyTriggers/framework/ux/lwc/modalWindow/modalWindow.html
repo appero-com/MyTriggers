@@ -1,0 +1,32 @@
+<template>
+    <template if:true={isVisible}>
+      <div class={modalClass}>  
+          <div class="slds-modal__container">
+              <header class="slds-modal__header">
+                  <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" 
+                          title="Close"
+                          onclick={close}>
+                      <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close"></lightning-icon>
+                      <span class="slds-assistive-text">Close</span>
+                  </button>
+                  <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">
+                      {title}
+                  </h2>
+              </header>
+              <div class="slds-modal__content slds-p-around_medium">
+                  <slot></slot>
+              </div>
+              <footer class="slds-modal__footer">
+                  <template for:each={footerButtons} for:item='button'>
+                          <button key={button.label} 
+                                  class={button.class}
+                                  onclick={button.click}>
+                              {button.label}
+                          </button>
+                  </template>
+              </footer>
+          </div>
+      </div>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>
