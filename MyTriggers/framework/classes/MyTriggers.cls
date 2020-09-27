@@ -850,4 +850,37 @@ global virtual class MyTriggers {
 		return settings;
 	}
 
+	/** TODO: move to new class
+	 * Returns list of all triggerHandlerSetting
+	 * @return all triggerHandlerSetting
+	 */
+	@AuraEnabled(cacheable=true)
+	public static List<MyTriggerSetting__mdt> getAllTriggerHandlerSettings(){
+		List<MyTriggerSetting__mdt> triggerHandlerSettings;
+
+		if (Test.isRunningTest() && triggerHandlerSettingMocks != null) {
+			triggerHandlerSettings = triggerHandlerSettingMocks;
+		} else {
+			triggerHandlerSettings = new List<MyTriggerSetting__mdt>(
+				[SELECT DeveloperName,
+				 Label,
+				 ClassNamespacePrefix__c,
+				 Event__c,
+				 sObject__c,
+				 sObject__r.QualifiedApiName,
+				 sObjectAPIName__c,
+				 Class__c,
+				 Order__c,
+				 Description__c,
+				 Active__c,
+				 IsBypassAllowed__c
+				 FROM MyTriggerSetting__mdt
+				 WHERE Active__c = true
+				                   ORDER BY Order__c,
+				 DeveloperName ASC]);
+		}
+		return triggerHandlerSettings;
+	}
+
+
 }
