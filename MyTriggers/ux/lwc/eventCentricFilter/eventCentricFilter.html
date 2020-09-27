@@ -1,0 +1,33 @@
+<template>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_2-of-2">
+            <lightning-combobox
+                name="progress"
+                label="When?"
+                placeholder="Select When"
+                options={optionsBA}
+                value={valueBA}
+                onchange={handleDMLTimingChange}></lightning-combobox>
+                
+        </div>
+
+        <div class="slds-col slds-size_2-of-2">
+            <lightning-combobox
+                name="progress"
+                label="DML"
+                placeholder="Select DML"
+                options={optionsCRUD}
+                value={valueCRUD}
+                onchange={handleDMLTypeChange}></lightning-combobox>
+                
+        </div>
+
+        <div class="slds-col slds-size_2-of-2 slds-m-top_small">
+            <c-toggle-picklist options={optionsSobjects} onchange={handleSobjectChange} title="Choose Sobjects"></c-toggle-picklist>
+        </div>
+
+        <div class="slds-col slds-size_2-of-2 slds-m-top_small">
+            <c-toggle-picklist options={optionsClasses} onchange={handleClassChange} title="Choose Classes"></c-toggle-picklist>
+        </div>
+    </div>
+</template>

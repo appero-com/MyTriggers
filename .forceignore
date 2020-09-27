@@ -5,3 +5,12 @@
 package.xml
 **profile**
 AppSwitcher
+
+
+#LWC VSCODE SETTINGS 
+**/jsconfig.json
+
+**/.eslintrc.json
+
+# LWC Jest
+**/__tests__/**
