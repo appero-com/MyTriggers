@@ -3,6 +3,7 @@
   "country": "US",
   "language": "en_US",
   "edition": "Developer",
+  "release": "preview",
   "settings": {
     "orgPreferenceSettings": {
       "s1DesktopEnabled": true
