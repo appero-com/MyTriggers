@@ -13,6 +13,6 @@
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <label>MyTriggers</label>
     <navType>Standard</navType>
-    <tabs>ViewMyTriggers</tabs>
+    <tabs>ViewMyTriggersTab</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>
