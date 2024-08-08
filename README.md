@@ -230,7 +230,7 @@ List<Sobject> untouchedRecords = MyTriggers.getRecordsNotYetProcessed();
 
 [global virtual class MyTriggers](MyTriggers.cls#L16)
 
-Leightweight Custom Metadata driven Trigger Framework that scales to your needs
+Lightweight Custom Metadata driven Trigger Framework that scales to your needs
 
 : info@appero.com
 

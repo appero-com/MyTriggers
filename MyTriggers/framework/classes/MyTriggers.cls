@@ -9,7 +9,7 @@
  * @created: 8-2018
  * @author: info@appero.com
  *
- * @Description Leightweight Custom Metadata driven Trigger Framework that scales to your needs. Provided with <3 by appero.com
+ * @Description Lightweight Custom Metadata driven Trigger Framework that scales to your needs. Provided with <3 by appero.com
  */
 
 
